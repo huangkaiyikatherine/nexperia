@@ -1,2 +1,16 @@
-# nexperia
-detect defects of semiconductors
+# Deep Neural Networks Help Detect Defects in Semiconductors
+For a company that produces millions of semiconductors each week, it is crucial to design a model to automate the detection of defects.
+
+There are nine types of defects, so the task is essentially an image classification task among ten classes (including the passed class). The data we obtain are quite imbalanced, with 30523 passed images and 7799 defect images. What's more, among the nine defect classes, data are not balanced, either. Some defect classes have as few as 5 images in total, while the largest defect class contains 3681 images. In the assemble line of semiconductors, the proportion between passed and defect images are supposed to be even more skewed. The key is to detect as many defect images as possible while not sacrificing too many passed ones.
+
+Our research applied two deep neural network models, ResNet18 and VGG19 with back normalization (we will call it VGG19 for simplicity from now on), and modified them to combine spatial transformer networks (STN) or attention networks to the defect detection task. We fed 31025 images to train plain ResNet18 and VGG19 models, ResNet18 and VGG19 with STN inserted before, respectively, and ResNet18 with three attention layers inserted after the last three residual blocks, respectively, and tested the above-mentioned five models on another set of 3830 images and compared the results.
+
+In order to measure the performance, we set defect images as positive (1), and passed ones negative (0). For each model, we compare the AUC and estimate the false positive rate (FPR) against true positive rate (TPR) being 99.1%, 99.3%, 99.5%, 99.7%, and 100%, respectively. We find that a plain ResNet18 model can detect defects quite accurately, with FPR below 5% when TPR is boosted to 99.7%. No other models can vie with a plain ResNet18 when TPR is up to 99.7%. However, when TPR is set to be 100%, i.e., all defect images are picked out, a VGG19 model with STN works best, with FPR below 25% when TPR=100% and below 8% when TPR<=99.7%.
+
+Another interesting finding is that, looking into the images that are wrongly classified by most models, we confirm that many of the passed images with high defect scores are indeed flawed. Furthermore, the higher the defect score is, the more reassuring that an image has defects, while those with relatively lower defect scores are considered on the borderline between passed and flawed. It is understandable that the current labels we are using are decided by human beings and humans make mistakes. Nevertheless, these mistakes could harm the trustworthiness of the ground truth of the data, thereby affecting our models' performance. With difficulties to further improve the performance of current deep neural networks, which all already give AUC over 99.60%, the forthcoming task will be to estimate the probability that mislabelling occurs and to apply neural networks to correct the mistakes.
+
+After reexamining the pass images with defect scores given by ResNet18 model higher than 99.1% flawed ones in our test dataset, we find out that 90% of them are indeed defects. The correction improves the performance on test dataset by decreasing the FPR by 1.0-2.0% when TPR is 99.1%, 99.3%, 99.5%, 99.7%, and 100%, respectively for ResNet18. The improvement is sitnificant for the first four result, for the original FPRs were already as low as below 5%.
+
+Goal: adapt the current model to auto-correct noisy labels
+
+Some assumptions are required, e.g., P(a defect image is overlooked by humans) (defect as a whole or for each type), ground truth.
