@@ -1,16 +1,113 @@
-# Deep Neural Networks Help Detect Defects in Semiconductors
-For a company that produces millions of semiconductors each week, it is crucial to design a model to automate the detection of defects.
+# Nexperia
+This is the PyTorch implementation of the Nexperia image classification models.
 
-There are nine types of defects, so the task is essentially an image classification task among ten classes (including the passed class). The data we obtain are quite imbalanced, with 30523 passed images and 7799 defect images. What's more, among the nine defect classes, data are not balanced, either. Some defect classes have as few as 5 images in total, while the largest defect class contains 3681 images. In the assemble line of semiconductors, the proportion between passed and defect images are supposed to be even more skewed. The key is to detect as many defect images as possible while not sacrificing too many passed ones.
+## Requirements
 
-Our research applied two deep neural network models, ResNet18 and VGG19 with back normalization (we will call it VGG19 for simplicity from now on), and modified them to combine spatial transformer networks (STN) or attention networks to the defect detection task. We fed 31025 images to train plain ResNet18 and VGG19 models, ResNet18 and VGG19 with STN inserted before, respectively, and ResNet18 with three attention layers inserted after the last three residual blocks, respectively, and tested the above-mentioned five models on another set of 3830 images and compared the results.
+- Python >= 3.6
+- PyTorch >= 1.0
+- CUDA
+- Numpy
 
-In order to measure the performance, we set defect images as positive (1), and passed ones negative (0). For each model, we compare the AUC and estimate the false positive rate (FPR) against true positive rate (TPR) being 99.1%, 99.3%, 99.5%, 99.7%, and 100%, respectively. We find that a plain ResNet18 model can detect defects quite accurately, with FPR below 5% when TPR is boosted to 99.7%. No other models can vie with a plain ResNet18 when TPR is up to 99.7%. However, when TPR is set to be 100%, i.e., all defect images are picked out, a VGG19 model with STN works best, with FPR below 25% when TPR=100% and below 8% when TPR<=99.7%.
+## Usage
+### Standard training
+The `main.py` contains training and evaluation functions in standard training setting.
+#### Runnable scripts
+- Training and evaluation using the default parameters
+  
+  We provide our training scripts in directory `scripts/`. For a concrete example, we can use the command as below to train the default model (i.e., ResNet-34) on the Nexperia dataset:
+  ```bash
+  $ bash scripts/nexperia/run_ce.sh [TRIAL_NAME]
+  ```
+  The argument `TRIAL_NAME` is optional, it helps us to identify different trials of the same experiments without modifying the training script. The evaluation is automatically performed when training is finished.
 
-Another interesting finding is that, looking into the images that are wrongly classified by most models, we confirm that many of the passed images with high defect scores are indeed flawed. Furthermore, the higher the defect score is, the more reassuring that an image has defects, while those with relatively lower defect scores are considered on the borderline between passed and flawed. It is understandable that the current labels we are using are decided by human beings and humans make mistakes. Nevertheless, these mistakes could harm the trustworthiness of the ground truth of the data, thereby affecting our models' performance. With difficulties to further improve the performance of current deep neural networks, which all already give AUC over 99.60%, the forthcoming task will be to estimate the probability that mislabelling occurs and to apply neural networks to correct the mistakes.
+- Additional arguments include
+  - `sat-es`: initial epochs of SAT
+  - `sat-alpha`: the momentum term $\alpha$ of SAT
+  - `eli`: initial epochs of weighted CE for class i (from 1 to 10)
+  - `ce-momentum`: the momentum term of weighted CE
+  - `arch`: the architecture of backbone model, e.g., resnet34
+  - `dataset`: the dataset to train, e.g., nexperia_split, nexperia, CIFAR10
 
-After reexamining the pass images with defect scores given by ResNet18 model higher than 99.1% flawed ones in our test dataset, we find out that 90% of them are indeed defects. The correction improves the performance on test dataset by decreasing the FPR by 1.0-2.0% when TPR is 99.1%, 99.3%, 99.5%, 99.7%, and 100%, respectively for ResNet18. The improvement is sitnificant for the first four result, for the original FPRs were already as low as below 5%.
 
-Goal: adapt the current model to auto-correct noisy labels
+#### Results on CIFAR datasets under uniform label noise
+- Test Accuracy(%) on CIFAR10
 
-Some assumptions are required, e.g., P(a defect image is overlooked by humans) (defect as a whole or for each type), ground truth.
+|Noise Rate         |0.2    |0.4    |0.6    |0.8    |
+|-------------------|-------|-------|-------|-------|
+|ResNet-34          |94.14  | 92.64 |89.23  |78.58  |
+|WRN-28-10          |94.84  | 93.23 |89.42  |80.13  |
+
+
+- Test Accuracy(%) on CIFA100
+
+|Noise Rate         |0.2    |0.4    |0.6    |0.8    |
+|-------------------|-------|-------|-------|-------|
+|ResNet-34          |75.77  |71.38  |62.69  |38.72  |
+|WRN-28-10          |77.71  | 72.60 |64.87  |44.17  |
+
+
+#### Runnable scripts for repreducing double-descent phenomenon
+You can use the command as below to train the default model (i.e., ResNet-18) on CIFAR10 dataset with 16.67% uniform label noise injected (i.e., 15% label *error* rate):
+  ```bash
+  $ bash scripts/cifar10/run_sat_dd_parallel.sh [TRIAL_NAME]
+  $ bash scripts/cifar10/run_ce_dd_parallel.sh [TRIAL_NAME]
+  ```
+
+
+#### Double-descent ERM vs. single-descent self-adaptive training
+<p align="center">
+    <img src="images/model_dd.png" width="450"\>
+</p>
+<p align="center">
+Double-descent ERM vs. single-descent self-adaptive training on the error-capacity curve. The vertical dashed line represents the interpolation threshold.
+</p>
+
+<p align="center">
+    <img src="images/epoch_dd.png" width="450"\>
+</p>
+<p align="center">
+Double-descent ERM vs. single-descent self-adaptive training on the epoch-capacity curve. The dashed vertical line represents the initial epoch E_s of our approach.
+</p>
+
+
+### Adversarial training
+We use state-of-the-art adversarial training algorithm [TRADES](https://github.com/yaodongyu/TRADES) as our baseline. The `main_adv.py` contains training and evaluation functions in adversarial training setting on CIFAR10 dataset.
+
+#### Training scripts
+- Training and evaluation using the default parameters
+  
+  We provides our training scripts in directory `scripts/cifar10`. For a concrete example, we can use the command as below to train the default model (i.e., WRN34-10) on CIFAR10 dataset with PGD-10 attack ($\epsilon$=0.031) to generate adversarial examples:
+  ```bash
+  $ bash scripts/cifar10/run_trades_sat.sh [TRIAL_NAME]
+  ```
+
+- Additional arguments 
+  - `beta`: hyper-parameter $1/\lambda$ in TRADES that controls the trade-off between natural accuracy and adversarial robustness
+  - `sat-es`: initial epochs of our approach
+  - `sat-alpha`: the momentum term $\alpha$ of our approach
+
+## Reference
+A report can be found in [the report](https://github.com/huangkaiyikatherine/nexperia/blob/master/The_First_Progress_Report_on_Advanced_Data_Analytics_for_Abnormal_Detection_of_Semiconductor_Devices.pdf).
+
+```
+@inproceedings{kaiyihuang,
+  title={The first progress report on advanced data analytics for abnormal detection of semiconductor devices},
+  author={Huang, Kaiyi},
+  year={2020}
+}
+```
+
+This is adapted from [the paper](https://arxiv.org/abs/2002.10319).
+
+```
+@inproceedings{huang2020self,
+  title={Self-Adaptive Training: beyond Empirical Risk Minimization},
+  author={Huang, Lang and Zhang, Chao and Zhang, Hongyang},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={33},
+  year={2020}
+}
+```
+
+## Contact
+If you have any question about this code, feel free to open an issue or contact kaiyihuang@ust.hk.
