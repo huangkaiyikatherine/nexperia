@@ -6,7 +6,8 @@ This is the PyTorch implementation of the Nexperia image classification models.
 - Python >= 3.6
 - PyTorch >= 1.0
 - CUDA
-- Numpy
+- NumPy
+- pandas
 
 ## Usage
 ### Standard training
