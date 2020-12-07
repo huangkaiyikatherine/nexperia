@@ -23,6 +23,7 @@ The `main.py` contains training and evaluation functions in standard training se
 - Additional arguments include
   - `sat-es`: initial epochs of SAT
   - `sat-alpha`: the momentum term $\alpha$ of SAT
+  - `mod`: modification of SAT, e.g., bad_1, bad_boost
   - `eli`: initial epochs of weighted CE for class i (from 1 to 10)
   - `ce-momentum`: the momentum term of weighted CE
   - `arch`: the architecture of backbone model, e.g., resnet34
