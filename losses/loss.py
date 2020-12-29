@@ -18,7 +18,11 @@ class CrossEntropy():
         self.weights = torch.zeros(num_epochs, len(self.true_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
         self.clean_weights = torch.zeros(num_epochs, len(self.clean_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
 
+<<<<<<< HEAD
     def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+=======
+    def __call__(self, logits, targets, index, epoch, state='train'):
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
         loss =  self.crit(logits, targets)
         
         # obtain prob, then update running avg
@@ -45,9 +49,13 @@ class CrossEntropy():
 
 
 class CrossEntropyWeightedBinary():
+<<<<<<< HEAD
     def __init__(self, labels, num_epochs, num_classes=10,
                  el1=None, el2=None, el3=None, el4=None, el5=None,
                  el6=None, el7=None, el8=None, el9=None, el10=None, momentum=1):
+=======
+    def __init__(self, labels, num_epochs, num_classes=10, el1=None, el2=None, el3=None, el4=None, el5=None, el6=None, el7=None, el8=None, el9=None, el10=None, momentum=1):
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
         self.crit = nn.CrossEntropyLoss(reduction='none')
         
         self.soft_labels = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
@@ -61,7 +69,11 @@ class CrossEntropyWeightedBinary():
         self.el = torch.tensor([el1, el2, el3, el4, el5, el6, el7, el8, el9, el10]).cuda(non_blocking=True)
         self.momentum = momentum
 
+<<<<<<< HEAD
     def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+=======
+    def __call__(self, logits, targets, index, epoch, state='train'):
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
         loss = self.crit(logits, targets)
         crit = nn.CrossEntropyLoss()
         
@@ -142,10 +154,18 @@ class SelfAdaptiveTrainingCE():
         if state=='train':
             # obtain weights
             weights, _ = self.soft_labels[index].max(dim=1)
+<<<<<<< HEAD
             if mod=='bad_boost':
                 weights[
                     torch.logical_or(torch.logical_or(targets==5, targets==7),
                                      torch.logical_or(targets==8, targets==9))] = 5.
+=======
+            if mod=='bad_1':
+                weights[targets!=4] = 1.
+            if mod=='bad_boost':
+                weights[targets!=4] = 1.
+                weights[np.logical_or(np.logical_or(targets==5, targets==7), np.logical_or(targets==8, targets==9))]=5.
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
             weights *= logits.shape[0] / weights.sum()
 
             # compute cross entropy loss, without reduction
@@ -161,6 +181,7 @@ class SelfAdaptiveTrainingCE():
         return loss, loss_bi, margin_error, margin_error_bi
 
 
+<<<<<<< HEAD
 class SelfAdaptiveTrainingCEMultiWeightedBCE():
     def __init__(self, labels, num_epochs, num_classes=10,
                  es1=None, es2=None, es3=None, es4=None, es5=None,
@@ -314,6 +335,8 @@ class SelfAdaptiveTrainingWeightedBCE():
         return loss, loss_bi, margin_error, margin_error_bi
 
 
+=======
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
 class SelfAdaptiveTrainingSCE():
     def __init__(self, labels, num_classes=10, momentum=0.9, es=40, alpha=1, beta=0.3):
         # initialize soft labels to onthot vectors

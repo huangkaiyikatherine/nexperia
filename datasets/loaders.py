@@ -29,9 +29,39 @@ def get_loader(args, data_aug=True):
         clean_train_set = CIFAR100(root=args.data_root, train=True, download=True, transform=tform_train)
         test_set = CIFAR100(root=args.data_root, train=False, download=True, transform=tform_test)
         
+<<<<<<< HEAD
     elif args.dataset == 'nexperia':        
         image_datasets = {x: MyImageFolder(os.path.join(args.data_root, x),
                                           tform_train)
+=======
+    elif args.dataset == 'nexperia':
+        data_transforms = {
+            'train': transforms.Compose([
+                transforms.Resize(255),
+                transforms.CenterCrop(224),
+                transforms.RandomRotation(10),
+                transforms.ColorJitter(0.2,0.2,0.2),
+                transforms.RandomAffine(degrees=2, translate=(0.15,0.1),scale=(0.75,1.05)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]),
+            ]),
+            'val': transforms.Compose([
+                transforms.Resize(255),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]),
+            ]),
+            'test': transforms.Compose([
+                transforms.Resize(255),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]),
+            ]),
+        }
+        
+        image_datasets = {x: MyImageFolder(os.path.join(args.data_root, x),
+                                          data_transform)
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
                   for x in ['train', 'val', 'test']}
                 
         combined_dataset = ConcatDataset([image_datasets[x] for x in ['train', 'val', 'test']])
@@ -43,9 +73,33 @@ def get_loader(args, data_aug=True):
     
     elif args.dataset =='nexperia_split':
         data_transforms = {
+<<<<<<< HEAD
             'train': tform_train,
             'val': tform_test,
             'test': tform_test
+=======
+            'train': transforms.Compose([
+                transforms.Resize(255),
+                transforms.CenterCrop(224),
+                transforms.RandomRotation(10),
+                transforms.ColorJitter(0.2,0.2,0.2),
+                transforms.RandomAffine(degrees=2, translate=(0.15,0.1),scale=(0.75,1.05)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]),
+            ]),
+            'val': transforms.Compose([
+                transforms.Resize(255),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]),
+            ]),
+            'test': transforms.Compose([
+                transforms.Resize(255),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]),
+            ]),
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
         }
         
         image_datasets = {x: MyImageFolder(os.path.join(args.data_root, x),

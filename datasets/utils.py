@@ -1,5 +1,8 @@
 import torchvision.transforms as transforms
+<<<<<<< HEAD
 import torch
+=======
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
 
 def get_mean_std(args):
     if args.dataset in ['cifar10', 'cifar100', 'nexperia', 'nexperia_split']:
@@ -19,7 +22,11 @@ def get_transform(args, train=True, data_aug=True):
     
     train = (train and data_aug)
 
+<<<<<<< HEAD
     if args.dataset in ['cifar10', 'cifar100']:
+=======
+    if args.dataset in ['cifar10', 'cifar100', 'nexperia', 'nexperia_split']:
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
         if train:
             tform = transforms.Compose([
                 transforms.RandomCrop(32, padding=4),
@@ -32,6 +39,7 @@ def get_transform(args, train=True, data_aug=True):
                 transforms.ToTensor(),
                 transforms.Normalize(mean, std)
             ])
+<<<<<<< HEAD
     elif args.dataset in ['nexperia', 'nexperia_split']:
         if args.crop in ['five', 'ten', 'ten_vert']:
             if args.crop=='five':
@@ -90,6 +98,9 @@ def get_transform(args, train=True, data_aug=True):
         else:
             raise ValueError("Crop Style `{}` is not supported yet.".format(args.crop))
     
+=======
+            
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
     else:
         raise ValueError("Dataset `{}` is not supported yet.".format(args.dataset))
 

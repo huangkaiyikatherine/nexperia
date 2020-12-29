@@ -22,11 +22,19 @@ EL_7=200
 EL_8=35
 EL_9=0
 EL_10=200
+<<<<<<< HEAD
 CE_MOMENTUM=0.1
 EXP_NAME=${DATASET}/${ARCH}_${LOSS}_el1_${EL_1}_el2_${EL_2}_el3_${EL_3}_el4_${EL_4}_el5_${EL_5}_el6_${EL_6}_el7_${EL_7}_el8_${EL_8}_el9_${EL_9}_el10_${EL_10}_momentum${CE_MOMENTUM}_lr${LR}_${LR_SCHEDULE}_epoch${EPOCHS}_$1
 SAVE_DIR=ckpts/${EXP_NAME}
 LOG_FILE=logs/${EXP_NAME}.log
 GPU_ID='0'
+=======
+CE_MOMENTUM=1
+EXP_NAME=${DATASET}/${ARCH}_${LOSS}_el1_${EL_1}_el2_${EL_2}_el3_${EL_3}_el4_${EL_4}_el5_${EL_5}_el6_${EL_6}_el7_${EL_7}_el8_${EL_8}_el9_${EL_9}_el10_${EL_10}_momentum${CE_MOMENTUM}_lr${LR}_${LR_SCHEDULE}_epoch${EPOCHS}_$1
+SAVE_DIR=ckpts/${EXP_NAME}
+LOG_FILE=logs/${EXP_NAME}.log
+GPU_ID='1'
+>>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
 DATA_ROOT='/home/kaiyihuang/nexperia/new_data'
 FREQ=50
 ### [90, 100, 200, 150, 90, 70, 200, 130, 0, 25]
