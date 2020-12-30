@@ -1,5 +1,4 @@
 import os
-<<<<<<< HEAD
 import math
 
 from sklearn import metrics
@@ -13,12 +12,6 @@ from torch.autograd import Variable
 from torchvision import transforms
 
 
-=======
-import torch
-from sklearn import metrics
-import numpy as np
-
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
 
 def save_checkpoint(save_dir, state, is_best, filename=None):
     """
@@ -137,7 +130,6 @@ class Timeline(object):
         self.me_class.append(me_class)
         self.me_bi_class.append(me_bi_class)
 
-<<<<<<< HEAD
 def get_margin(output, label):
     top2 = output.topk(2)[1]
     pred = torch.argmax(output, dim=1)
@@ -265,5 +257,3 @@ def get_Lip_L1(resnet, block='BasicBlock',s=1000):
     
     lip *= resnet.linear.weight.norm(2).item() / s
     return lip
-=======
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb

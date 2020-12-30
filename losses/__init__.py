@@ -1,11 +1,7 @@
 from __future__ import absolute_import
 
-<<<<<<< HEAD
 from .loss import CrossEntropy, CrossEntropyWeightedBinary, SelfAdaptiveTrainingCE, SelfAdaptiveTrainingCEMultiWeightedBCE, SelfAdaptiveTrainingWeightedBCE, SelfAdaptiveTrainingSCE
 
-=======
-from .loss import CrossEntropy, CrossEntropyWeightedBinary, SelfAdaptiveTrainingCE, SelfAdaptiveTrainingSCE
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
 from .trades import TRADES, TRADES_SAT
 
 
@@ -32,7 +28,6 @@ def get_loss(args, labels=None, num_classes=10):
                                                el1=args.el1, el2=args.el2, el3=args.el3, el4=args.el4, el5=args.el5,
                                                el6=args.el6, el7=args.el7, el8=args.el8, el9=args.el9, el10=args.el10,
                                                momentum=args.ce_momentum)
-<<<<<<< HEAD
     elif args.loss == 'sat_binary_weighted_ce':
         criterion = SelfAdaptiveTrainingWeightedBCE(labels, num_classes=num_classes, num_epochs=args.epochs,
                                                     el1=args.el1, el2=args.el2, el3=args.el3, el4=args.el4, el5=args.el5,
@@ -47,9 +42,6 @@ def get_loss(args, labels=None, num_classes=10):
                                                            el1=args.el1, el2=args.el2, el3=args.el3, el4=args.el4, el5=args.el5,
                                                            el6=args.el6, el7=args.el7, el8=args.el8, el9=args.el9, el10=args.el10,
                                                            ce_momentum=args.ce_momentum, momentum=args.sat_alpha)
-=======
-    
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
     else:
         raise KeyError("Loss `{}` is not supported.".format(args.loss))
 

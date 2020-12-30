@@ -16,11 +16,7 @@ import torch.backends.cudnn as cudnn
 from datasets import get_loader
 from losses import get_loss
 from models import get_model
-<<<<<<< HEAD
 from utils import *
-=======
-from utils import get_scheduler, get_optimizer, accuracy, save_checkpoint, AverageMeter, AUCMeter, Timeline
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
 
 
 parser = argparse.ArgumentParser(description='Self-Adaptive Trainingn')
@@ -40,13 +36,8 @@ parser.add_argument('--train-sets', help='subsets (train/trainval) that used to 
                     default='train', type=str)
 parser.add_argument('--val-sets', type=str, nargs='+', default=['noisy_val'],
                     help='subsets (clean_train/noisy_train/clean_val/noisy_val) that used to validation')
-<<<<<<< HEAD
 parser.add_argument('--crop', help='crop style',
                     default='center', type=str)
-=======
-parser.add_argument('--ten-crop', help='whether to do ten-crop on test data',
-                    default=False, type=bool)
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
 parser.add_argument('--epochs', default=200, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
@@ -82,7 +73,6 @@ parser.add_argument('--sat-alpha', default=0.9, type=float,
                     help='momentum term of self-adaptive training')
 parser.add_argument('--sat-es', default=0, type=int,
                     help='start epoch of self-adaptive training (default 0)')
-<<<<<<< HEAD
 parser.add_argument('--sat-es1', default=None, type=int,
                     help='start epoch of self-adaptive training (default 0) for class 1')
 parser.add_argument('--sat-es2', default=None, type=int,
@@ -103,8 +93,6 @@ parser.add_argument('--sat-es9', default=None, type=int,
                     help='start epoch of self-adaptive training (default 0) for class 9')
 parser.add_argument('--sat-es10', default=None, type=int,
                     help='start epoch of self-adaptive training (default 0) for class 10')
-=======
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
 # misc
 parser.add_argument('-s', '--seed', default=None, type=int,
                     help='number of data loading workers (default: None)')
@@ -214,11 +202,7 @@ def main():
     test_timeline = Timeline()
 
     if args.evaluate:
-<<<<<<< HEAD
         validate(test_loader, model, args.crop)
-=======
-        validate(test_loader, model)
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
         return
 
     print("*" * 40)
@@ -227,11 +211,7 @@ def main():
         scheduler.step(epoch)
 
         # train for one epoch
-<<<<<<< HEAD
         train(train_loader, model, criterion, optimizer, epoch, train_timeline, args.sat_es, args.dataset, args.mod, args.crop)
-=======
-        train(train_loader, model, criterion, optimizer, epoch, train_timeline, args.sat_es, args.dataset, args.mod)
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
         print("*" * 40)
         
         if args.dataset!='nexperia':
@@ -239,7 +219,6 @@ def main():
             prec1 = 0
             if args.dataset=='nexperia_split':
                 print('val:')
-<<<<<<< HEAD
                 val_auc = validate(
                     val_loaders, model, epoch, val_timeline, args.dataset, state='val', criterion=criterion, crop=args.crop)
                 print("*" * 40)
@@ -251,17 +230,6 @@ def main():
                 for name, val_loader in zip(args.val_sets, val_loaders):
                     print(name +":", end="\t")
                     prec1 = validate(val_loader, model, args.crop)
-=======
-                val_auc = validate(val_loaders, model, epoch, val_timeline, args.dataset, 'val', criterion)
-                print("*" * 40)
-                
-                print('test:')
-                test_auc = validate(test_loader, model, epoch, test_timeline, args.dataset, 'test', criterion)
-            else:
-                for name, val_loader in zip(args.val_sets, val_loaders):
-                    print(name +":", end="\t")
-                    prec1 = validate(val_loader, model)
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
             print("*" * 40)
             
             if args.dataset=='nexperia_split':
@@ -302,11 +270,7 @@ def main():
     if args.dataset!='nexperia':
         # evaludate latest checkpoint
         print("Test acc of latest checkpoint:", end='\t')
-<<<<<<< HEAD
         validate(test_loader, model, epoch, test_timeline, args.dataset, last=True, crop=args.crop)
-=======
-        validate(test_loader, model, epoch, test_timeline, args.dataset, last=True)
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
         print("*" * 40)
         
         # evaluate best checkpoint
@@ -315,11 +279,7 @@ def main():
             print("Best validation auc ({}th epoch): {:.2f}%".format(checkpoint['epoch'], best_auc*100.))
             model.load_state_dict(checkpoint['state_dict'])
             print("Test acc of best checkpoint:", end='\t')
-<<<<<<< HEAD
             validate(test_loader, model, checkpoint['epoch'], test_timeline, args.dataset, last=True, crop=args.crop)
-=======
-            validate(test_loader, model, checkpoint['epoch'], test_timeline, args.dataset, last=True)
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
             print("*" * 40)
         else:
             if len(val_loaders) > 0:
@@ -327,11 +287,7 @@ def main():
                 print("Best validation acc ({}th epoch): {:.2f}%".format(checkpoint['epoch'], best_prec1))
                 model.load_state_dict(checkpoint['state_dict'])
                 print("Test acc of best checkpoint:", end='\t')
-<<<<<<< HEAD
                 validate(test_loader, model, last=True, crop=args.crop)
-=======
-                validate(test_loader, model, last=True)
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
                 print("*" * 40)
 
     time_elapsed = time.time() - start
@@ -368,11 +324,7 @@ def main():
     train_loss_bi_class = torch.cat(train_timeline.loss_bi_class, dim=0)
     train_me_class = torch.cat(train_timeline.me_class, dim=0)
     train_me_bi_class = torch.cat(train_timeline.me_bi_class, dim=0)
-<<<<<<< HEAD
         
-=======
-    
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
     val_acc_class = torch.cat(val_timeline.acc_class, dim=0)
     val_loss_class = torch.cat(val_timeline.loss_class, dim=0)
     val_acc_bi_class = torch.cat(val_timeline.acc_bi_class, dim=0)
@@ -450,11 +402,7 @@ def main():
     np.save(os.path.join(args.save_dir, 'test', 'fpr_1.npy'), test_timeline.fpr_1)
     print("other testing details are saved to {}".format(os.path.join(args.save_dir, 'test')))
 
-<<<<<<< HEAD
 def train(train_loader, model, criterion, optimizer, epoch, timeline, es, dataset, mod=None, crop='center'):
-=======
-def train(train_loader, model, criterion, optimizer, epoch, timeline, es, dataset, mod=None):
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
     """
         Run one train epoch
     """
@@ -466,11 +414,8 @@ def train(train_loader, model, criterion, optimizer, epoch, timeline, es, datase
     binary_acc = AverageMeter()
     margin_error = AverageMeter()
     binary_margin_error = AverageMeter()
-<<<<<<< HEAD
     lip_pow = AverageMeter()
     lip_l1 = AverageMeter()
-=======
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
     
     auc_meter = AUCMeter()
 
@@ -489,16 +434,12 @@ def train(train_loader, model, criterion, optimizer, epoch, timeline, es, datase
             target = target.cuda(non_blocking=True)
 
             # compute output
-<<<<<<< HEAD
             if crop!='center':
                 bs, ncrops, c, h, w = input.size()
                 output = model(input.view(-1, c, h, w)).view(bs, ncrops, -1).mean(1)
             else:
                 output = model(input)
             
-=======
-            output = model(input)
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
             loss, loss_bi, me, margin_error_bi = criterion(output, target, index, epoch, mod=mod)
 
             # compute gradient and do SGD step
@@ -554,7 +495,6 @@ def train(train_loader, model, criterion, optimizer, epoch, timeline, es, datase
 
             input = input.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
-<<<<<<< HEAD
             
             # compute output
             if crop!='center':
@@ -566,12 +506,6 @@ def train(train_loader, model, criterion, optimizer, epoch, timeline, es, datase
             loss, loss_bi, me, margin_error_bi = criterion(output, target, index, epoch, mod=mod)
             
             lip_l1_tmp = get_Lip_L1(model)
-=======
-
-            # compute output
-            output = model(input)
-            loss, loss_bi, me, margin_error_bi = criterion(output, target, index, epoch)
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
 
             # compute gradient and do SGD step
             optimizer.zero_grad()
@@ -617,10 +551,7 @@ def train(train_loader, model, criterion, optimizer, epoch, timeline, es, datase
                           epoch+1, i+1, len(train_loader), lr=lr, batch_time=batch_time, data_time=data_time,
                           loss=losses, top1=top1, loss_bi=binary_losses, bi_acc=binary_acc,
                           margin_error=margin_error, margin_error_bi=binary_margin_error))
-<<<<<<< HEAD
 
-=======
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
         
         acc_class = torch.zeros(1, 10)
         loss_class = torch.zeros(1, 10)
@@ -667,11 +598,7 @@ def train(train_loader, model, criterion, optimizer, epoch, timeline, es, datase
                     acc_class, loss_class, acc_bi_class, loss_bi_class, me_class, me_bi_class)
 
 
-<<<<<<< HEAD
 def validate(val_loader, model, epoch, timeline, dataset, state=None, criterion=None, last=False, crop='center'):
-=======
-def validate(val_loader, model, epoch, timeline, dataset, state=None, criterion=None, last=False):
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
     """
     Run evaluation
     """
@@ -695,7 +622,6 @@ def validate(val_loader, model, epoch, timeline, dataset, state=None, criterion=
 
         # compute output
         with torch.no_grad():
-<<<<<<< HEAD
             # compute output
             if crop!='center':
                 bs, ncrops, c, h, w = input.size()
@@ -703,9 +629,6 @@ def validate(val_loader, model, epoch, timeline, dataset, state=None, criterion=
             else:
                 output = model(input)
 
-=======
-            output = model(input)
->>>>>>> 35ae2811a1414d2aa5319e131a62636cf49648fb
             probs = F.softmax(output, dim=1)
             if state==None or criterion==None:
                 loss = F.cross_entropy(output, target)
