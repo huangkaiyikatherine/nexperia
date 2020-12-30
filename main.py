@@ -414,8 +414,6 @@ def train(train_loader, model, criterion, optimizer, epoch, timeline, es, datase
     binary_acc = AverageMeter()
     margin_error = AverageMeter()
     binary_margin_error = AverageMeter()
-    lip_pow = AverageMeter()
-    lip_l1 = AverageMeter()
     
     auc_meter = AUCMeter()
 
@@ -505,7 +503,6 @@ def train(train_loader, model, criterion, optimizer, epoch, timeline, es, datase
 
             loss, loss_bi, me, margin_error_bi = criterion(output, target, index, epoch, mod=mod)
             
-            lip_l1_tmp = get_Lip_L1(model)
 
             # compute gradient and do SGD step
             optimizer.zero_grad()
