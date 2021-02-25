@@ -1,13 +1,17 @@
 from __future__ import absolute_import
 
-from .loss import CrossEntropy, CrossEntropyWeightedBinary, SelfAdaptiveTrainingCE, SelfAdaptiveTrainingCEMultiWeightedBCE, SelfAdaptiveTrainingWeightedBCE, SelfAdaptiveTrainingSCE, WeightedCrossEntropy
+from .loss import CrossEntropy, CrossEntropyWeightedBinary, SelfAdaptiveTrainingCE, SelfAdaptiveTrainingCEMultiWeightedBCE, SelfAdaptiveTrainingWeightedBCE, SelfAdaptiveTrainingSCE, WeightedCrossEntropy, CrossEntropyGeneral
 
 from .trades import TRADES, TRADES_SAT
 
 
-def get_loss(args, labels=None, num_classes=10):
+def get_loss(args, labels=None, num_classes=10, datasets=None):
     if args.loss == 'ce':
-        criterion = CrossEntropy(labels, num_classes=num_classes, num_epochs=args.epochs)
+        if args.dataset=='nexperia_merge':
+            criterion = CrossEntropyGeneral(len(datasets['train']), len(datasets['val']), len(datasets['test']),
+                                     num_epochs=args.epochs, num_classes=num_classes)
+        else:
+            criterion = CrossEntropy(labels, num_classes=num_classes, num_epochs=args.epochs)
         
     elif args.loss == 'wce':
         criterion = WeightedCrossEntropy(labels, num_classes=num_classes, num_epochs=args.epochs)

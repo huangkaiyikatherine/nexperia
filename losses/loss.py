@@ -44,6 +44,47 @@ class CrossEntropy():
         return loss, loss_bi, margin_error, margin_error_bi
 
 
+class CrossEntropyGeneral():
+    def __init__(self, len_train, len_val, len_test, num_epochs, num_classes=10):
+        self.crit = nn.CrossEntropyLoss()
+        
+        self.soft_labels = torch.zeros(len_train + len_val + len_test, num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.image_class_index = torch.zeros(len_train + len_val + len_test, dtype=torch.long).cuda(non_blocking=True)
+        
+        self.len_train = len_train
+        self.len_val = len_val
+        self.len_test = len_test
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        loss =  self.crit(logits, targets)
+        
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+        loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,4] * 2 - 1) * torch.sign((targets==4).int() - 0.5))
+
+        if state=='val':
+            index+=self.len_train
+        elif state=='test':
+            length = self.len_train + self.len_val
+            index+=length
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+            
+        if epoch==0:
+            self.image_class_index[index]=targets
+        
+        self.soft_labels[index] = prob
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
 class CrossEntropyWeightedBinary():
     def __init__(self, labels, num_epochs, num_classes=10,
                  el1=None, el2=None, el3=None, el4=None, el5=None,

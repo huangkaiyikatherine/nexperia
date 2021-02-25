@@ -75,10 +75,10 @@ def get_loader(args, data_aug=True):
                  for x in ['train', 'val', 'test']}
                 
         dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=args.batch_size,
-                                             shuffle=True, num_workers=4)
+                                             shuffle=True, num_workers=8)
               for x in ['train', 'val', 'test']}
         
-        return dataloaders['train'], dataloaders['val'], dataloaders['test'], 10, np.load('files/targets.npy')
+        return dataloaders['train'], dataloaders['val'], dataloaders['test'], 10, image_datasets
     
     else:
         raise ValueError("Dataset `{}` is not supported yet.".format(args.dataset))
