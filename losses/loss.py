@@ -240,6 +240,76 @@ class SelfAdaptiveTrainingCE():
         return loss, loss_bi, margin_error, margin_error_bi
 
 
+class SelfAdaptiveTrainingCEGeneral():
+    def __init__(self, len_train, len_val, len_test, num_epochs, num_classes=10, momentum=0.9, es=40):
+        # initialize soft labels to onthot vectors
+        self.soft_labels = torch.zeros(len_train + len_val + len_test, num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.image_class_index = torch.zeros(len_train + len_val + len_test, dtype=torch.long).cuda(non_blocking=True)
+        self.outputs = torch.zeros(len_train + len_val + len_test, num_classes, dtype=torch.float).cuda(non_blocking=True)
+        
+        self.len_train = len_train
+        self.len_val = len_val
+        self.len_test = len_test
+
+        self.momentum = momentum
+        self.es = es
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,4] * 2 - 1) * torch.sign((targets==4).int() - 0.5))
+
+        if state=='val':
+            index+=self.len_train
+        elif state=='test':
+            length = self.len_train + self.len_val
+            index+=length
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+
+        self.outputs[index] = prob
+        if epoch < self.es:
+            if epoch==0:
+                self.soft_labels[index, targets] = 1
+                self.image_class_index[index]=targets
+            loss = F.cross_entropy(logits, targets)
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+            return loss, loss_bi, margin_error, margin_error_bi
+        else:
+            if mod is not None:
+                self.soft_labels[index[targets==4]] = self.momentum*self.soft_labels[index[targets==4]]+(1-self.momentum)*prob[targets==4]
+            else:
+                self.soft_labels[index] = self.momentum * self.soft_labels[index] + (1 - self.momentum) * prob
+
+        if state=='train':
+            # obtain weights
+            weights, _ = self.soft_labels[index].max(dim=1)
+            if mod=='bad_boost':
+                weights[
+                    torch.logical_or(torch.logical_or(targets==5, targets==7),
+                                     torch.logical_or(targets==8, targets==9))] = 5.
+            weights *= logits.shape[0] / weights.sum()
+
+            # compute cross entropy loss, without reduction
+            loss = torch.sum(-F.log_softmax(logits, dim=1) * self.soft_labels[index], dim=1)
+
+            # sample weighted mean
+            loss = (loss * weights).mean()
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float(), weight=weights)
+        else:
+            loss = F.cross_entropy(logits, targets)
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
 class SelfAdaptiveTrainingCEMultiWeightedBCE():
     def __init__(self, labels, num_epochs, num_classes=10,
                  es1=None, es2=None, es3=None, es4=None, es5=None,
