@@ -1,25 +1,26 @@
-DATASET=nexperia_split
-DATA_ROOT='\home\kaiyihuang\nexperia\batch_3/all'
-ARCH=resnet18
+DATASET=nexperia_train
+# DATA_ROOT='/home/kaiyihuang/nexperia/batch_3/all'
+DATA_ROOT='/import/home/share/from_Nexperia_April2021/Nex_trainingset'
+DATA_ROOT_1='/home/kaiyihuang/nexperia/new_data'
+DATA_ROOT_2='/home/kaiyihuang/nexperia/batch_3'
+CSV=''
+ARCH=resnet50
 LR=0.001
 LR_SCHEDULE='cosine'
-EPOCHS=50
-BATCH_SIZE=256
+EPOCHS=200
+BATCH_SIZE=32
 LOSS=ce
-ALPHA=0.9
-ES=150
-NOISE_RATE=0.02
-NOISE_TYPE='corrupted_label'
-TRAIN_SETS='trainval'
-VAL_SETS='test_set'
+TRAIN_SET='Nex_trainingset_train.txt'
+VAL_SET='Nex_trainingset_val.txt'
+TEST_SET='Nex_trainingset_test.txt'
 CROP='center'
-PRETRAINED='true'
+PRETRAINED='false'
 EXP_NAME=${DATASET}/${ARCH}_pretrained_${PRETRAINED}_crop_${CROP}_${LOSS}_lr${LR}_${LR_SCHEDULE}_epoch${EPOCHS}_batchsize_${BATCH_SIZE}_$1
 SAVE_DIR=ckpts/${EXP_NAME}
 LOG_FILE=logs/${EXP_NAME}.log
-GPU_ID='0'
-DATA_ROOT='/home/kaiyihuang/nexperia/new_data'
-FREQ=200
+GPU_ID='4'
+FREQ=500
+SAVE_FREQ=10
 
 ### print info
 echo ${EXP_NAME}
@@ -30,14 +31,11 @@ mkdir -p logs/${DATASET}
 
 ### train
 CUDA_VISIBLE_DEVICES=${GPU_ID} \
-python -u main.py --arch ${ARCH} --loss ${LOSS} \
-        --sat-alpha ${ALPHA} --sat-es ${ES} \
-        --dataset ${DATASET} --data-root ${DATA_ROOT} --crop ${CROP} \
-        --noise-rate ${NOISE_RATE} --noise-type ${NOISE_TYPE} \
+python -u main_train.py --arch ${ARCH} --loss ${LOSS} \
+        --dataset ${DATASET} --data-root ${DATA_ROOT} --data-root-1 ${DATA_ROOT_1} --data-root-2 ${DATA_ROOT_2} --crop ${CROP} \
         --lr ${LR} --lr-schedule ${LR_SCHEDULE} \
-        --train-sets ${TRAIN_SETS} --val-sets ${VAL_SETS} \
+        --train-set ${TRAIN_SET} --val-set ${VAL_SET} --test-set ${TEST_SET} \
         --batch-size ${BATCH_SIZE} --epochs ${EPOCHS} \
         --save-dir ${SAVE_DIR} \
-        --print-freq ${FREQ} \
-        --pretrained ${PRETRAINED} \
+        --print-freq ${FREQ} --save-freq ${SAVE_FREQ} \
         >> ${LOG_FILE} 2>&1

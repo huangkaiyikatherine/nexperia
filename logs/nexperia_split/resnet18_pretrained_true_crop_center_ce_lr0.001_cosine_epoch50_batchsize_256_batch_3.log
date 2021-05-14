@@ -1,4 +1,4 @@
-Namespace(arch='resnet18', base_width=64, batch_size=256, ce_momentum=0, crop='center', data_root='/home/kaiyihuang/nexperia/new_data', dataset='nexperia_split', el1=None, el10=None, el2=None, el3=None, el4=None, el5=None, el6=None, el7=None, el8=None, el9=None, epochs=50, evaluate=False, feature_extraction=False, loss='ce', lr=0.001, lr_gamma=0.1, lr_milestones=[40, 80], lr_schedule='cosine', mod=None, momentum=0.9, noise_info=None, noise_rate=0.02, noise_type='corrupted_label', optimizer='sgd', pretrained=True, print_freq=200, resume='', sat_alpha=0.9, sat_es=150, sat_es1=None, sat_es10=None, sat_es2=None, sat_es3=None, sat_es4=None, sat_es5=None, sat_es6=None, sat_es7=None, sat_es8=None, sat_es9=None, save_dir='ckpts/nexperia_split/resnet18_pretrained_true_crop_center_ce_lr0.001_cosine_epoch50_batchsize_256_batch_3', save_freq=0, seed=775, start_epoch=0, train_sets='trainval', turn_off_aug=False, use_refined_label=False, val_sets=['test_set'], weight_decay=0.0005, workers=4)
+Namespace(arch='resnet18', base_width=64, batch_size=256, ce_momentum=0, crop='center', data_root='/home/kaiyihuang/nexperia/batch_3/all', dataset='nexperia_split', el1=None, el10=None, el2=None, el3=None, el4=None, el5=None, el6=None, el7=None, el8=None, el9=None, epochs=50, evaluate=False, feature_extraction=False, loss='ce', lr=0.001, lr_gamma=0.1, lr_milestones=[40, 80], lr_schedule='cosine', mod=None, momentum=0.9, noise_info=None, noise_rate=0.02, noise_type='corrupted_label', optimizer='sgd', pretrained=True, print_freq=200, resume='', sat_alpha=0.9, sat_es=150, sat_es1=None, sat_es10=None, sat_es2=None, sat_es3=None, sat_es4=None, sat_es5=None, sat_es6=None, sat_es7=None, sat_es8=None, sat_es9=None, save_dir='ckpts/nexperia_split/resnet18_pretrained_true_crop_center_ce_lr0.001_cosine_epoch50_batchsize_256_batch_3', save_freq=0, seed=1406, start_epoch=0, train_sets='trainval', turn_off_aug=False, use_refined_label=False, val_sets=['test_set'], weight_decay=0.0005, workers=4)
 Using `SGD` optimizer
 Using `cosine` schedule
 ****************************************
@@ -6,168 +6,96 @@ Using `cosine` schedule
   "https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate", UserWarning)
 /home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
   warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [1][122/122]	LR 0.001000	Time 2.017 (0.482)	Data 0.016 (0.035)	Loss 0.5462 (0.8050)	Prec@1 79.592 (78.276)	Binary Loss 0.3105 (0.4936)	Binary Accuracy 89.796 (80.026)	Margin Error 0.5573 (0.4759)	Binary Margin Error 0.5727 (0.4465)
-Epoch: [1]	AUC: 73.44%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 98.95%, 99.20%, 99.39%, 99.71%, 99.99%
+Epoch: [1][200/479]	LR 0.001000	Time 0.426 (0.447)	Data 0.021 (0.032)	Loss 0.1482 (0.2650)	Prec@1 95.312 (94.004)	Binary Loss 0.0945 (0.1904)	Binary Accuracy 95.312 (93.918)	Margin Error 0.8858 (0.8647)	Binary Margin Error 0.8782 (0.8484)
+Epoch: [1][400/479]	LR 0.001000	Time 0.417 (0.430)	Data 0.020 (0.028)	Loss 0.0865 (0.1949)	Prec@1 95.703 (95.168)	Binary Loss 0.0663 (0.1347)	Binary Accuracy 96.484 (95.366)	Margin Error 0.9125 (0.8829)	Binary Margin Error 0.9105 (0.8741)
+Epoch: [1][479/479]	LR 0.001000	Time 2.703 (0.432)	Data 0.017 (0.027)	Loss 0.0939 (0.1802)	Prec@1 97.279 (95.396)	Binary Loss 0.0460 (0.1230)	Binary Accuracy 99.320 (95.707)	Margin Error 0.9236 (0.8878)	Binary Margin Error 0.9305 (0.8809)
+Epoch: [1]	AUC: 91.99%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 93.95%, 95.64%, 96.66%, 98.05%, 99.87%
 ****************************************
 val:
-Epoch: [1]	Loss 0.5807	Prec@1 81.84%	Binary Loss 0.3006	Binary Accuracy 86.89%	Margin Error 0.5928	Binary Margin Error 0.6039	AUC: 92.11%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 63.45%, 68.62%, 71.20%, 71.50%, 89.30%
+Epoch: [1]	Loss 0.1377	Prec@1 96.42%	Binary Loss 0.0989	Binary Accuracy 96.58%	Margin Error 0.9217	Binary Margin Error 0.9243	AUC: 98.60%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 12.44%, 12.93%, 21.37%, 22.60%, 39.95%
 ****************************************
 test:
-Epoch: [1]	Loss 0.5884	Prec@1 81.80%	Binary Loss 0.3078	Binary Accuracy 87.18%	Margin Error 0.5875	Binary Margin Error 0.5976	AUC: 91.13%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 61.76%, 63.76%, 68.81%, 72.08%, 94.43%
+Epoch: [1]	Loss 0.1392	Prec@1 96.34%	Binary Loss 0.1009	Binary Accuracy 96.48%	Margin Error 0.9221	Binary Margin Error 0.9247	AUC: 98.66%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 14.12%, 15.56%, 23.77%, 27.43%, 49.29%
 ****************************************
 /home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
   warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [2][122/122]	LR 0.000999	Time 0.099 (0.426)	Data 0.016 (0.035)	Loss 0.3050 (0.5095)	Prec@1 93.878 (84.745)	Binary Loss 0.1442 (0.2538)	Binary Accuracy 93.878 (89.808)	Margin Error 0.7493 (0.6249)	Binary Margin Error 0.7799 (0.6641)
-Epoch: [2]	AUC: 93.33%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 64.98%, 68.64%, 71.69%, 76.43%, 93.26%
+Epoch: [2][200/479]	LR 0.000999	Time 0.412 (0.426)	Data 0.020 (0.029)	Loss 0.1088 (0.0960)	Prec@1 96.875 (97.035)	Binary Loss 0.0747 (0.0557)	Binary Accuracy 97.656 (97.881)	Margin Error 0.9176 (0.9215)	Binary Margin Error 0.9222 (0.9264)
+Epoch: [2][400/479]	LR 0.000999	Time 0.413 (0.421)	Data 0.020 (0.026)	Loss 0.0866 (0.0877)	Prec@1 96.875 (97.325)	Binary Loss 0.0439 (0.0496)	Binary Accuracy 97.656 (98.142)	Margin Error 0.9314 (0.9278)	Binary Margin Error 0.9384 (0.9342)
+Epoch: [2][479/479]	LR 0.000999	Time 0.255 (0.420)	Data 0.021 (0.025)	Loss 0.0478 (0.0853)	Prec@1 97.959 (97.407)	Binary Loss 0.0361 (0.0477)	Binary Accuracy 98.639 (98.215)	Margin Error 0.9533 (0.9301)	Binary Margin Error 0.9560 (0.9369)
+Epoch: [2]	AUC: 99.27%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 9.10%, 10.91%, 14.20%, 16.71%, 50.27%
 ****************************************
 val:
-Epoch: [2]	Loss 0.4414	Prec@1 86.83%	Binary Loss 0.2072	Binary Accuracy 91.12%	Margin Error 0.7173	Binary Margin Error 0.7762	AUC: 96.95%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 49.73%, 51.69%, 55.59%, 55.66%, 81.47%
+Epoch: [2]	Loss 0.1123	Prec@1 96.53%	Binary Loss 0.0770	Binary Accuracy 97.11%	Margin Error 0.9314	Binary Margin Error 0.9374	AUC: 99.41%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 7.56%, 8.31%, 11.55%, 13.29%, 24.74%
 ****************************************
 test:
-Epoch: [2]	Loss 0.4464	Prec@1 86.61%	Binary Loss 0.2089	Binary Accuracy 91.57%	Margin Error 0.7136	Binary Margin Error 0.7759	AUC: 96.81%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 45.61%, 56.36%, 60.29%, 61.17%, 89.88%
+Epoch: [2]	Loss 0.1101	Prec@1 96.40%	Binary Loss 0.0755	Binary Accuracy 96.87%	Margin Error 0.9312	Binary Margin Error 0.9370	AUC: 99.46%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 8.99%, 11.64%, 14.19%, 17.83%, 26.63%
 ****************************************
 /home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
   warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [3][122/122]	LR 0.000996	Time 0.101 (0.427)	Data 0.017 (0.036)	Loss 0.5431 (0.3841)	Prec@1 81.633 (88.741)	Binary Loss 0.2442 (0.1746)	Binary Accuracy 87.755 (93.299)	Margin Error 0.6345 (0.7174)	Binary Margin Error 0.7286 (0.7803)
-Epoch: [3]	AUC: 96.81%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 47.11%, 51.28%, 58.50%, 65.65%, 95.36%
+Epoch: [3][200/479]	LR 0.000996	Time 0.420 (0.428)	Data 0.023 (0.032)	Loss 0.0813 (0.0709)	Prec@1 98.047 (97.836)	Binary Loss 0.0283 (0.0368)	Binary Accuracy 98.828 (98.656)	Margin Error 0.9502 (0.9425)	Binary Margin Error 0.9664 (0.9527)
+Epoch: [3][400/479]	LR 0.000996	Time 0.417 (0.424)	Data 0.021 (0.027)	Loss 0.0342 (0.0680)	Prec@1 99.219 (97.912)	Binary Loss 0.0267 (0.0340)	Binary Accuracy 99.219 (98.777)	Margin Error 0.9592 (0.9450)	Binary Margin Error 0.9606 (0.9563)
+Epoch: [3][479/479]	LR 0.000996	Time 0.254 (0.423)	Data 0.021 (0.026)	Loss 0.0745 (0.0685)	Prec@1 97.279 (97.897)	Binary Loss 0.0438 (0.0341)	Binary Accuracy 98.639 (98.784)	Margin Error 0.9468 (0.9451)	Binary Margin Error 0.9596 (0.9567)
+Epoch: [3]	AUC: 99.60%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 5.00%, 5.52%, 7.17%, 9.77%, 91.03%
 ****************************************
 val:
-Epoch: [3]	Loss 0.3505	Prec@1 89.64%	Binary Loss 0.1630	Binary Accuracy 93.24%	Margin Error 0.7790	Binary Margin Error 0.8394	AUC: 98.48%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 21.48%, 35.17%, 56.50%, 67.16%, 82.24%
+Epoch: [3]	Loss 0.1318	Prec@1 96.16%	Binary Loss 0.0974	Binary Accuracy 96.58%	Margin Error 0.9271	Binary Margin Error 0.9323	AUC: 99.60%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 5.90%, 6.06%, 9.02%, 9.16%, 15.46%
 ****************************************
 test:
-Epoch: [3]	Loss 0.3563	Prec@1 89.03%	Binary Loss 0.1682	Binary Accuracy 93.50%	Margin Error 0.7735	Binary Margin Error 0.8380	AUC: 98.17%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 35.12%, 46.85%, 49.87%, 62.39%, 96.36%
+Epoch: [3]	Loss 0.1303	Prec@1 96.01%	Binary Loss 0.0967	Binary Accuracy 96.39%	Margin Error 0.9257	Binary Margin Error 0.9309	AUC: 99.66%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 5.06%, 6.45%, 8.14%, 9.00%, 22.30%
 ****************************************
 /home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
   warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [4][122/122]	LR 0.000991	Time 0.099 (0.431)	Data 0.016 (0.037)	Loss 0.2229 (0.3087)	Prec@1 95.918 (90.978)	Binary Loss 0.0583 (0.1350)	Binary Accuracy 100.000 (94.959)	Margin Error 0.8285 (0.7714)	Binary Margin Error 0.8951 (0.8364)
-Epoch: [4]	AUC: 98.06%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 31.23%, 35.41%, 42.55%, 54.42%, 85.88%
+Epoch: [4][200/479]	LR 0.000991	Time 0.418 (0.424)	Data 0.021 (0.029)	Loss 0.0767 (0.0645)	Prec@1 97.656 (97.904)	Binary Loss 0.0240 (0.0306)	Binary Accuracy 99.219 (98.877)	Margin Error 0.9448 (0.9490)	Binary Margin Error 0.9730 (0.9619)
+Epoch: [4][400/479]	LR 0.000991	Time 0.412 (0.421)	Data 0.022 (0.026)	Loss 0.0349 (0.0617)	Prec@1 99.219 (98.035)	Binary Loss 0.0162 (0.0291)	Binary Accuracy 99.609 (98.946)	Margin Error 0.9687 (0.9510)	Binary Margin Error 0.9752 (0.9639)
+Epoch: [4][479/479]	LR 0.000991	Time 0.247 (0.420)	Data 0.017 (0.025)	Loss 0.0583 (0.0615)	Prec@1 97.279 (98.029)	Binary Loss 0.0215 (0.0287)	Binary Accuracy 98.639 (98.956)	Margin Error 0.9448 (0.9511)	Binary Margin Error 0.9683 (0.9644)
+Epoch: [4]	AUC: 99.72%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 3.52%, 4.01%, 4.78%, 6.72%, 45.35%
 ****************************************
 val:
-Epoch: [4]	Loss 0.2612	Prec@1 92.34%	Binary Loss 0.1077	Binary Accuracy 95.71%	Margin Error 0.8173	Binary Margin Error 0.8809	AUC: 98.89%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 21.33%, 33.89%, 41.46%, 51.95%, 69.24%
+Epoch: [4]	Loss 0.1079	Prec@1 96.57%	Binary Loss 0.0751	Binary Accuracy 97.17%	Margin Error 0.9339	Binary Margin Error 0.9422	AUC: 99.69%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 3.63%, 6.27%, 8.91%, 10.76%, 14.09%
 ****************************************
 test:
-Epoch: [4]	Loss 0.2608	Prec@1 92.35%	Binary Loss 0.1076	Binary Accuracy 95.95%	Margin Error 0.8161	Binary Margin Error 0.8847	AUC: 98.76%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 25.36%, 42.96%, 49.31%, 51.77%, 98.79%
+Epoch: [4]	Loss 0.1062	Prec@1 96.55%	Binary Loss 0.0742	Binary Accuracy 97.17%	Margin Error 0.9338	Binary Margin Error 0.9419	AUC: 99.70%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 3.35%, 3.61%, 6.45%, 7.93%, 27.83%
 ****************************************
 /home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
   warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [5][122/122]	LR 0.000984	Time 0.097 (0.432)	Data 0.015 (0.036)	Loss 0.2185 (0.2550)	Prec@1 93.878 (92.580)	Binary Loss 0.1205 (0.1108)	Binary Accuracy 93.878 (95.948)	Margin Error 0.8204 (0.8061)	Binary Margin Error 0.8264 (0.8689)
-Epoch: [5]	AUC: 98.68%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 25.42%, 28.22%, 33.41%, 41.12%, 88.60%
+Epoch: [5][200/479]	LR 0.000984	Time 0.426 (0.428)	Data 0.027 (0.031)	Loss 0.0221 (0.0575)	Prec@1 99.609 (98.078)	Binary Loss 0.0099 (0.0257)	Binary Accuracy 99.219 (99.062)	Margin Error 0.9785 (0.9543)	Binary Margin Error 0.9853 (0.9684)
+Epoch: [5][400/479]	LR 0.000984	Time 0.418 (0.424)	Data 0.022 (0.027)	Loss 0.0730 (0.0571)	Prec@1 97.656 (98.106)	Binary Loss 0.0289 (0.0257)	Binary Accuracy 99.219 (99.050)	Margin Error 0.9490 (0.9547)	Binary Margin Error 0.9678 (0.9687)
+Epoch: [5][479/479]	LR 0.000984	Time 0.249 (0.423)	Data 0.018 (0.027)	Loss 0.0298 (0.0566)	Prec@1 99.320 (98.128)	Binary Loss 0.0093 (0.0253)	Binary Accuracy 100.000 (99.065)	Margin Error 0.9808 (0.9550)	Binary Margin Error 0.9834 (0.9690)
+Epoch: [5]	AUC: 99.77%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 2.26%, 2.65%, 3.16%, 4.73%, 37.72%
 ****************************************
 val:
-Epoch: [5]	Loss 0.2187	Prec@1 93.36%	Binary Loss 0.0855	Binary Accuracy 96.84%	Margin Error 0.8379	Binary Margin Error 0.9038	AUC: 99.26%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 13.14%, 18.06%, 19.22%, 34.55%, 49.47%
+Epoch: [5]	Loss 0.0987	Prec@1 96.93%	Binary Loss 0.0669	Binary Accuracy 97.58%	Margin Error 0.9391	Binary Margin Error 0.9482	AUC: 99.75%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 3.57%, 5.95%, 7.09%, 8.43%, 12.00%
 ****************************************
 test:
-Epoch: [5]	Loss 0.2199	Prec@1 93.26%	Binary Loss 0.0881	Binary Accuracy 97.15%	Margin Error 0.8385	Binary Margin Error 0.9059	AUC: 99.01%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 22.71%, 31.72%, 43.02%, 50.49%, 97.94%
+Epoch: [5]	Loss 0.0960	Prec@1 96.92%	Binary Loss 0.0652	Binary Accuracy 97.53%	Margin Error 0.9395	Binary Margin Error 0.9482	AUC: 99.78%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 2.66%, 3.11%, 4.29%, 4.31%, 11.63%
 ****************************************
 /home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
   warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [6][122/122]	LR 0.000976	Time 0.097 (0.432)	Data 0.014 (0.035)	Loss 0.0817 (0.2290)	Prec@1 100.000 (93.209)	Binary Loss 0.0534 (0.1004)	Binary Accuracy 97.959 (96.438)	Margin Error 0.9002 (0.8246)	Binary Margin Error 0.9115 (0.8843)
-Epoch: [6]	AUC: 98.91%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 22.47%, 26.00%, 30.86%, 41.24%, 95.95%
+Epoch: [6][200/479]	LR 0.000976	Time 0.416 (0.426)	Data 0.022 (0.030)	Loss 0.0221 (0.0546)	Prec@1 99.219 (98.176)	Binary Loss 0.0101 (0.0237)	Binary Accuracy 99.609 (99.100)	Margin Error 0.9795 (0.9568)	Binary Margin Error 0.9831 (0.9712)
+Epoch: [6][400/479]	LR 0.000976	Time 0.413 (0.422)	Data 0.021 (0.026)	Loss 0.0225 (0.0530)	Prec@1 99.219 (98.248)	Binary Loss 0.0173 (0.0230)	Binary Accuracy 99.219 (99.126)	Margin Error 0.9776 (0.9577)	Binary Margin Error 0.9796 (0.9719)
+Epoch: [6][479/479]	LR 0.000976	Time 0.249 (0.421)	Data 0.018 (0.025)	Loss 0.0783 (0.0525)	Prec@1 97.279 (98.273)	Binary Loss 0.0268 (0.0226)	Binary Accuracy 99.320 (99.149)	Margin Error 0.9459 (0.9582)	Binary Margin Error 0.9722 (0.9724)
+Epoch: [6]	AUC: 99.83%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 1.98%, 2.19%, 2.69%, 3.79%, 19.91%
 ****************************************
 val:
-Epoch: [6]	Loss 0.1957	Prec@1 94.08%	Binary Loss 0.0778	Binary Accuracy 97.19%	Margin Error 0.8513	Binary Margin Error 0.9140	AUC: 99.34%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 12.78%, 18.82%, 23.08%, 31.31%, 45.03%
+Epoch: [6]	Loss 0.0960	Prec@1 96.94%	Binary Loss 0.0659	Binary Accuracy 97.62%	Margin Error 0.9409	Binary Margin Error 0.9501	AUC: 99.76%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 3.69%, 5.27%, 6.83%, 7.54%, 10.85%
 ****************************************
 test:
-Epoch: [6]	Loss 0.2006	Prec@1 93.81%	Binary Loss 0.0803	Binary Accuracy 97.47%	Margin Error 0.8525	Binary Margin Error 0.9168	AUC: 99.11%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 21.23%, 32.04%, 43.64%, 51.61%, 97.77%
+Epoch: [6]	Loss 0.0930	Prec@1 97.07%	Binary Loss 0.0636	Binary Accuracy 97.66%	Margin Error 0.9410	Binary Margin Error 0.9501	AUC: 99.81%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 2.25%, 2.70%, 3.02%, 3.76%, 12.45%
 ****************************************
 /home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
   warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [7][122/122]	LR 0.000965	Time 0.102 (0.429)	Data 0.016 (0.037)	Loss 0.2236 (0.2097)	Prec@1 95.918 (93.631)	Binary Loss 0.1349 (0.0916)	Binary Accuracy 95.918 (96.664)	Margin Error 0.8597 (0.8374)	Binary Margin Error 0.8986 (0.8958)
-Epoch: [7]	AUC: 99.08%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 18.82%, 22.42%, 26.47%, 39.51%, 91.31%
+Epoch: [7][200/479]	LR 0.000965	Time 0.423 (0.430)	Data 0.023 (0.032)	Loss 0.0889 (0.0496)	Prec@1 97.266 (98.412)	Binary Loss 0.0493 (0.0208)	Binary Accuracy 98.047 (99.244)	Margin Error 0.9409 (0.9606)	Binary Margin Error 0.9580 (0.9749)
+Epoch: [7][400/479]	LR 0.000965	Time 0.411 (0.424)	Data 0.021 (0.027)	Loss 0.0840 (0.0485)	Prec@1 97.266 (98.438)	Binary Loss 0.0265 (0.0207)	Binary Accuracy 98.438 (99.258)	Margin Error 0.9442 (0.9613)	Binary Margin Error 0.9679 (0.9754)
+Epoch: [7][479/479]	LR 0.000965	Time 0.259 (0.422)	Data 0.025 (0.026)	Loss 0.0238 (0.0485)	Prec@1 98.639 (98.424)	Binary Loss 0.0149 (0.0205)	Binary Accuracy 99.320 (99.258)	Margin Error 0.9766 (0.9613)	Binary Margin Error 0.9794 (0.9755)
+Epoch: [7]	AUC: 99.85%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 1.49%, 1.98%, 2.45%, 3.54%, 49.07%
 ****************************************
 val:
-Epoch: [7]	Loss 0.1903	Prec@1 94.26%	Binary Loss 0.0766	Binary Accuracy 97.10%	Margin Error 0.8638	Binary Margin Error 0.9212	AUC: 99.46%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 7.86%, 11.43%, 21.81%, 24.50%, 39.17%
+Epoch: [7]	Loss 0.0855	Prec@1 97.24%	Binary Loss 0.0568	Binary Accuracy 97.85%	Margin Error 0.9445	Binary Margin Error 0.9544	AUC: 99.80%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 2.82%, 4.81%, 5.54%, 6.08%, 10.01%
 ****************************************
 test:
-Epoch: [7]	Loss 0.1966	Prec@1 94.05%	Binary Loss 0.0806	Binary Accuracy 97.23%	Margin Error 0.8641	Binary Margin Error 0.9235	AUC: 99.22%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 19.56%, 34.27%, 37.91%, 39.06%, 95.02%
+Epoch: [7]	Loss 0.0828	Prec@1 97.32%	Binary Loss 0.0545	Binary Accuracy 97.96%	Margin Error 0.9445	Binary Margin Error 0.9547	AUC: 99.83%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 1.75%, 2.30%, 3.15%, 3.41%, 7.82%
 ****************************************
 /home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
   warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [8][122/122]	LR 0.000952	Time 0.102 (0.427)	Data 0.016 (0.033)	Loss 0.2032 (0.1943)	Prec@1 91.837 (94.189)	Binary Loss 0.1052 (0.0847)	Binary Accuracy 95.918 (97.073)	Margin Error 0.8288 (0.8480)	Binary Margin Error 0.8862 (0.9041)
-Epoch: [8]	AUC: 99.15%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 17.70%, 24.72%, 33.58%, 44.04%, 84.19%
-****************************************
-val:
-Epoch: [8]	Loss 0.1741	Prec@1 94.75%	Binary Loss 0.0667	Binary Accuracy 97.62%	Margin Error 0.8660	Binary Margin Error 0.9253	AUC: 99.54%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 11.03%, 13.36%, 13.54%, 23.59%, 25.12%
-****************************************
-test:
-Epoch: [8]	Loss 0.1778	Prec@1 94.73%	Binary Loss 0.0702	Binary Accuracy 97.81%	Margin Error 0.8683	Binary Margin Error 0.9276	AUC: 99.25%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 14.61%, 40.14%, 43.22%, 49.18%, 86.96%
-****************************************
-/home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
-  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [9][122/122]	LR 0.000938	Time 0.097 (0.431)	Data 0.014 (0.038)	Loss 0.1934 (0.1822)	Prec@1 93.878 (94.546)	Binary Loss 0.0847 (0.0791)	Binary Accuracy 95.918 (97.344)	Margin Error 0.8501 (0.8556)	Binary Margin Error 0.8942 (0.9119)
-Epoch: [9]	AUC: 99.25%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 18.83%, 21.83%, 28.95%, 35.11%, 80.31%
-****************************************
-val:
-Epoch: [9]	Loss 0.1694	Prec@1 94.87%	Binary Loss 0.0648	Binary Accuracy 97.71%	Margin Error 0.8757	Binary Margin Error 0.9327	AUC: 99.60%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 7.10%, 11.29%, 11.90%, 14.20%, 35.06%
-****************************************
-test:
-Epoch: [9]	Loss 0.1744	Prec@1 94.88%	Binary Loss 0.0701	Binary Accuracy 97.70%	Margin Error 0.8770	Binary Margin Error 0.9344	AUC: 99.33%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 15.83%, 33.39%, 39.09%, 42.43%, 83.88%
-****************************************
-/home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
-  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [10][122/122]	LR 0.000922	Time 0.102 (0.422)	Data 0.016 (0.031)	Loss 0.1098 (0.1718)	Prec@1 95.918 (94.756)	Binary Loss 0.0583 (0.0727)	Binary Accuracy 97.959 (97.479)	Margin Error 0.8910 (0.8616)	Binary Margin Error 0.9132 (0.9176)
-Epoch: [10]	AUC: 99.42%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 11.92%, 14.42%, 19.90%, 25.97%, 77.82%
-****************************************
-val:
-Epoch: [10]	Loss 0.1632	Prec@1 94.98%	Binary Loss 0.0598	Binary Accuracy 97.62%	Margin Error 0.8772	Binary Margin Error 0.9355	AUC: 99.66%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 6.37%, 7.54%, 8.12%, 11.72%, 23.26%
-****************************************
-test:
-Epoch: [10]	Loss 0.1697	Prec@1 94.99%	Binary Loss 0.0659	Binary Accuracy 97.81%	Margin Error 0.8783	Binary Margin Error 0.9364	AUC: 99.39%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 12.39%, 24.77%, 37.48%, 38.66%, 76.08%
-****************************************
-/home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
-  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [11][122/122]	LR 0.000905	Time 0.098 (0.427)	Data 0.016 (0.034)	Loss 0.1401 (0.1680)	Prec@1 95.918 (94.901)	Binary Loss 0.0802 (0.0706)	Binary Accuracy 97.959 (97.589)	Margin Error 0.8797 (0.8662)	Binary Margin Error 0.9323 (0.9209)
-Epoch: [11]	AUC: 99.44%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 11.47%, 13.48%, 17.85%, 25.16%, 72.81%
-****************************************
-val:
-Epoch: [11]	Loss 0.1613	Prec@1 94.95%	Binary Loss 0.0626	Binary Accuracy 97.53%	Margin Error 0.8774	Binary Margin Error 0.9352	AUC: 99.65%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 8.55%, 9.39%, 9.87%, 15.36%, 22.97%
-****************************************
-test:
-Epoch: [11]	Loss 0.1648	Prec@1 94.93%	Binary Loss 0.0680	Binary Accuracy 97.75%	Margin Error 0.8790	Binary Margin Error 0.9364	AUC: 99.39%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 14.02%, 25.88%, 40.69%, 41.91%, 61.80%
-****************************************
-/home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
-  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [12][122/122]	LR 0.000885	Time 0.097 (0.422)	Data 0.015 (0.031)	Loss 0.1252 (0.1600)	Prec@1 95.918 (95.114)	Binary Loss 0.0985 (0.0671)	Binary Accuracy 97.959 (97.634)	Margin Error 0.8898 (0.8701)	Binary Margin Error 0.9074 (0.9235)
-Epoch: [12]	AUC: 99.48%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 10.93%, 13.36%, 17.45%, 24.14%, 65.06%
-****************************************
-val:
-Epoch: [12]	Loss 0.1525	Prec@1 95.21%	Binary Loss 0.0558	Binary Accuracy 97.91%	Margin Error 0.8849	Binary Margin Error 0.9416	AUC: 99.69%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 5.72%, 6.73%, 8.48%, 12.05%, 21.33%
-****************************************
-test:
-Epoch: [12]	Loss 0.1556	Prec@1 95.27%	Binary Loss 0.0604	Binary Accuracy 97.91%	Margin Error 0.8852	Binary Margin Error 0.9417	AUC: 99.50%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 13.99%, 21.99%, 30.24%, 32.54%, 43.84%
-****************************************
-/home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
-  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [13][122/122]	LR 0.000864	Time 0.102 (0.430)	Data 0.017 (0.036)	Loss 0.1281 (0.1533)	Prec@1 95.918 (95.233)	Binary Loss 0.0328 (0.0631)	Binary Accuracy 97.959 (97.795)	Margin Error 0.8908 (0.8740)	Binary Margin Error 0.9475 (0.9280)
-Epoch: [13]	AUC: 99.56%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 8.68%, 10.68%, 12.60%, 19.02%, 73.48%
-****************************************
-val:
-Epoch: [13]	Loss 0.1505	Prec@1 95.42%	Binary Loss 0.0549	Binary Accuracy 97.80%	Margin Error 0.8863	Binary Margin Error 0.9429	AUC: 99.73%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 5.17%, 6.19%, 6.88%, 7.79%, 20.20%
-****************************************
-test:
-Epoch: [13]	Loss 0.1554	Prec@1 95.35%	Binary Loss 0.0607	Binary Accuracy 97.99%	Margin Error 0.8878	Binary Margin Error 0.9442	AUC: 99.51%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 14.91%, 21.56%, 35.16%, 36.04%, 42.46%
-****************************************
-/home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
-  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [14][122/122]	LR 0.000842	Time 0.100 (0.430)	Data 0.016 (0.035)	Loss 0.0647 (0.1508)	Prec@1 97.959 (95.394)	Binary Loss 0.0157 (0.0616)	Binary Accuracy 100.000 (97.840)	Margin Error 0.9208 (0.8768)	Binary Margin Error 0.9703 (0.9301)
-Epoch: [14]	AUC: 99.58%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 8.59%, 10.58%, 13.96%, 18.55%, 57.03%
-****************************************
-val:
-Epoch: [14]	Loss 0.1528	Prec@1 95.27%	Binary Loss 0.0569	Binary Accuracy 97.85%	Margin Error 0.8830	Binary Margin Error 0.9414	AUC: 99.74%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 4.99%, 5.21%, 6.63%, 9.10%, 13.32%
-****************************************
-test:
-Epoch: [14]	Loss 0.1603	Prec@1 95.12%	Binary Loss 0.0644	Binary Accuracy 97.94%	Margin Error 0.8836	Binary Margin Error 0.9424	AUC: 99.52%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 17.50%, 20.35%, 31.39%, 31.75%, 36.30%
-****************************************
-/home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
-  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
-Epoch: [15][122/122]	LR 0.000819	Time 0.100 (0.435)	Data 0.016 (0.037)	Loss 0.0845 (0.1458)	Prec@1 95.918 (95.455)	Binary Loss 0.0456 (0.0600)	Binary Accuracy 97.959 (97.898)	Margin Error 0.8966 (0.8789)	Binary Margin Error 0.9350 (0.9325)
-Epoch: [15]	AUC: 99.60%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 8.65%, 10.58%, 13.12%, 18.88%, 85.91%
-****************************************
-val:
-Epoch: [15]	Loss 0.1437	Prec@1 95.45%	Binary Loss 0.0496	Binary Accuracy 97.97%	Margin Error 0.8862	Binary Margin Error 0.9449	AUC: 99.77%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 4.11%, 4.40%, 6.04%, 6.41%, 20.71%
-****************************************
-test:
-Epoch: [15]	Loss 0.1465	Prec@1 95.46%	Binary Loss 0.0556	Binary Accuracy 98.20%	Margin Error 0.8876	Binary Margin Error 0.9456	AUC: 99.55%	FPR(=99.1%, 99.3%, 99.5%, 99.7%, 100%): 20.77%, 23.26%, 28.83%, 30.24%, 34.40%
-****************************************
-/home/kaiyihuang/.conda/envs/tensorflow2_pytorch/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:143: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
-  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
+Epoch: [8][200/479]	LR 0.000952	Time 0.416 (0.431)	Data 0.023 (0.032)	Loss 0.1078 (0.0451)	Prec@1 96.875 (98.566)	Binary Loss 0.0561 (0.0190)	Binary Accuracy 98.047 (99.328)	Margin Error 0.9286 (0.9631)	Binary Margin Error 0.9491 (0.9768)
+Epoch: [8][400/479]	LR 0.000952	Time 0.422 (0.425)	Data 0.023 (0.027)	Loss 0.0149 (0.0454)	Prec@1 99.609 (98.558)	Binary Loss 0.0069 (0.0189)	Binary Accuracy 99.609 (99.336)	Margin Error 0.9801 (0.9633)	Binary Margin Error 0.9881 (0.9774)

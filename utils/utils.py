@@ -13,17 +13,13 @@ from torchvision import transforms
 
 
 
-def save_checkpoint(save_dir, state, is_best, filename=None):
+def save_checkpoint(save_dir, state, filename=None):
     """
     Save the latest and best training model
     """
     filename = 'checkpoint_latest.tar' if filename is None else filename
     filename = os.path.join(save_dir, filename)
     torch.save(state, filename)
-    if is_best:
-        filename = os.path.join(save_dir, 'checkpoint_best.tar')
-        torch.save(state, filename)
-
 
 def accuracy(output, target, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
@@ -65,18 +61,17 @@ class AUCMeter(object):
     def reset(self):
         self.y_true = []
         self.y_score = []
-        self.image_ids = []
         
-    def update(self, y_true, y_score, image_id):
+    def update(self, y_true, y_score):
         self.y_true.append(y_true)
         self.y_score.append(y_score)
-        self.image_ids.append(image_id)
         
-    def calculate(self):
-        y_true = torch.cat(self.y_true)
-        y_score = torch.cat(self.y_score)
-        auc = metrics.roc_auc_score(y_true!=4, 1.-y_score[:,4])
-        fpr, tpr, thresholds = metrics.roc_curve(y_true!=4, 1.-y_score[:,4])
+    def calculate(self, pass_idx):
+        y_true = torch.cat(self.y_true).cpu()
+        y_score = torch.cat(self.y_score).cpu()
+        auc = metrics.roc_auc_score(y_true!=pass_idx, 1.-y_score[:,pass_idx])
+        fpr, tpr, thresholds = metrics.roc_curve(y_true!=pass_idx, 1.-y_score[:,pass_idx])
+        fpr_98 = fpr[np.where(tpr>=0.98)[0][0]]
         fpr_991 = fpr[np.where(tpr>=0.991)[0][0]]
         fpr_993 = fpr[np.where(tpr>=0.993)[0][0]]
         fpr_995 = fpr[np.where(tpr>=0.995)[0][0]]
@@ -84,7 +79,7 @@ class AUCMeter(object):
         fpr_999 = fpr[np.where(tpr>=0.999)[0][0]]
         fpr_1 = fpr[np.where(tpr==1.)[0][0]]
         
-        return auc, fpr_991, fpr_993, fpr_995, fpr_997, fpr_999, fpr_1
+        return auc, fpr_98, fpr_991, fpr_993, fpr_995, fpr_997, fpr_999, fpr_1
     
 class Timeline(object):
     """Stores epoch values"""
@@ -96,6 +91,7 @@ class Timeline(object):
         self.margin_error = []
         self.margin_error_bi = []
         self.auc = []
+        self.fpr_98 = []
         self.fpr_991 = []
         self.fpr_993 = []
         self.fpr_995 = []
@@ -109,7 +105,7 @@ class Timeline(object):
         self.me_class = []
         self.me_bi_class = []
         
-    def update(self, loss, acc, loss_bi, acc_bi, margin_error, margin_error_bi, auc, fpr_991, fpr_993, fpr_995, fpr_997, fpr_999, fpr_1, acc_class, loss_class, acc_bi_class, loss_bi_class, me_class, me_bi_class):
+    def update(self, loss, acc, loss_bi, acc_bi, margin_error, margin_error_bi, auc, fpr_98, fpr_991, fpr_993, fpr_995, fpr_997, fpr_999, fpr_1, acc_class, loss_class, acc_bi_class, loss_bi_class, me_class, me_bi_class):
         self.loss.append(loss)
         self.acc.append(acc)
         self.loss_bi.append(loss_bi)
@@ -117,6 +113,7 @@ class Timeline(object):
         self.margin_error.append(margin_error)
         self.margin_error_bi.append(margin_error_bi)
         self.auc.append(auc)
+        self.fpr_98.append(fpr_98)
         self.fpr_991.append(fpr_991)
         self.fpr_993.append(fpr_993)
         self.fpr_995.append(fpr_995)

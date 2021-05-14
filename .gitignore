@@ -2,3 +2,8 @@
 ckpts
 images
 logs
+pytorch-domain-adaptation
+save_temp
+*.ipynb
+*.jpg
+main.py.lprof

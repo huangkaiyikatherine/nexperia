@@ -2,7 +2,7 @@ import torchvision.transforms as transforms
 import torch
 
 def get_mean_std(args):
-    if args.dataset in ['cifar10', 'cifar100', 'nexperia', 'nexperia_split']:
+    if args.dataset in ['cifar10', 'cifar100', 'nexperia', 'nexperia_split', 'nexperia_merge', 'nexperia_train', 'nexperia_eval']:
         mean, std = (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
     
     else:
@@ -32,7 +32,7 @@ def get_transform(args, train=True, data_aug=True):
                 transforms.ToTensor(),
                 transforms.Normalize(mean, std)
             ])
-    elif args.dataset in ['nexperia', 'nexperia_split']:
+    elif args.dataset in ['nexperia', 'nexperia_split', 'nexperia_merge', 'nexperia_train', 'nexperia_eval']:
         if args.crop in ['five', 'ten', 'ten_vert']:
             if args.crop=='five':
                 crop = transforms.FiveCrop(224)

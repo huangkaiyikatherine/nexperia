@@ -41,4 +41,4 @@ class ConcatDataset(torch.utils.data.ConcatDataset):
             sample_idx = idx
         else:
             sample_idx = idx - self.cumulative_sizes[dataset_idx - 1]
-        return self.datasets[dataset_idx][sample_idx], idx
+        return self.datasets[dataset_idx][sample_idx], idx, dataset_idx

@@ -1,16 +1,61 @@
 from __future__ import absolute_import
 
-from .loss import CrossEntropy, CrossEntropyWeightedBinary, SelfAdaptiveTrainingCE, SelfAdaptiveTrainingCEMultiWeightedBCE, SelfAdaptiveTrainingWeightedBCE, SelfAdaptiveTrainingSCE
+from .loss import CrossEntropy, CrossEntropyWeightedBinary, SelfAdaptiveTrainingCE, SelfAdaptiveTrainingCEMultiWeightedBCE, SelfAdaptiveTrainingWeightedBCE, SelfAdaptiveTrainingSCE, WeightedCrossEntropy, CrossEntropyGeneral, CrossEntropyTrain, SelfAdaptiveTrainingCEGeneral, FocalLoss, FocalLossGeneral, SelfAdaptiveTrainingFL, SelfAdaptiveTrainingFLGeneral, SelfAdaptiveTrainingCETrain, FocalLossTrain, SelfAdaptiveTrainingFLTrain
 
 from .trades import TRADES, TRADES_SAT
 
 
-def get_loss(args, labels=None, num_classes=10):
+def get_loss(args, labels=None, num_classes=10, datasets=None, train_len=None, val_len=None, test_len=None, pass_idx=None):
     if args.loss == 'ce':
-        criterion = CrossEntropy(labels, num_classes=num_classes, num_epochs=args.epochs)
+        if args.dataset=='nexperia_merge':
+            criterion = CrossEntropyGeneral(len(datasets['train']), len(datasets['val']), len(datasets['test']),
+                                     num_epochs=args.epochs, num_classes=num_classes)
+        elif args.dataset=='nexperia_train' or args.dataset=='nexperia_eval':
+            criterion = CrossEntropyTrain(labels, train_len, val_len, test_len, pass_idx,
+                                     num_epochs=args.epochs, num_classes=num_classes)
+        else:
+            criterion = CrossEntropy(labels, num_classes=num_classes, num_epochs=args.epochs)
+        
+    elif args.loss == 'wce':
+        criterion = WeightedCrossEntropy(labels, num_classes=num_classes, num_epochs=args.epochs)
     
     elif args.loss == 'sat':
-        criterion = SelfAdaptiveTrainingCE(labels, num_classes=num_classes, momentum=args.sat_alpha, es=args.sat_es, num_epochs=args.epochs)
+        if args.dataset=='nexperia_merge':
+            criterion = SelfAdaptiveTrainingCEGeneral(len(datasets['train']), len(datasets['val']), len(datasets['test']),
+                                                      num_epochs=args.epochs, num_classes=num_classes,
+                                                      momentum=args.sat_alpha, es=args.sat_es)
+        elif args.dataset=='nexperia_train' or args.dataset=='nexperia_eval':
+            criterion = SelfAdaptiveTrainingCETrain(labels, train_len, val_len, test_len, pass_idx,
+                                                    num_classes=num_classes, momentum=args.sat_alpha,
+                                                    es=args.sat_es, num_epochs=args.epochs)
+        else:
+            criterion = SelfAdaptiveTrainingCE(
+                labels, num_classes=num_classes, momentum=args.sat_alpha, es=args.sat_es, num_epochs=args.epochs)
+    
+    elif args.loss == 'fl':
+        if args.dataset=='nexperia_merge':
+            criterion = FocalLossGeneral(len(datasets['train']), len(datasets['val']), len(datasets['test']),
+                                     num_epochs=args.epochs, num_classes=num_classes, alpha=args.fl_alpha, gamma=args.fl_gamma)
+        elif args.dataset=='nexperia_train' or args.dataset=='nexperia_eval':
+            criterion = FocalLossTrain(labels, train_len, val_len, test_len, pass_idx,
+                                     num_epochs=args.epochs, num_classes=num_classes, alpha=args.fl_alpha, gamma=args.fl_gamma)
+        else:
+            criterion = FocalLoss(labels, num_classes=num_classes, num_epochs=args.epochs, alpha=args.fl_alpha, gamma=args.fl_gamma)
+    
+    elif args.loss == 'sat_fl':
+        if args.dataset=='nexperia_merge':
+            criterion = SelfAdaptiveTrainingFLGeneral(len(datasets['train']), len(datasets['val']), len(datasets['test']),
+                                                      num_epochs=args.epochs, num_classes=num_classes,
+                                                      momentum=args.sat_alpha, es=args.sat_es,
+                                                      lamb=args.fl_lambda, alpha=args.fl_alpha, gamma=args.fl_gamma)
+        elif args.dataset=='nexperia_train' or args.dataset=='nexperia_eval':
+            criterion = SelfAdaptiveTrainingFLTrain(labels, train_len, val_len, test_len, pass_idx,
+                                                    num_epochs=args.epochs, num_classes=num_classes,
+                                                    momentum=args.sat_alpha, es=args.sat_es,
+                                                    lamb=args.fl_lambda, alpha=args.fl_alpha, gamma=args.fl_gamma)
+        else:
+            criterion = SelfAdaptiveTrainingFL(labels, num_classes=num_classes, momentum=args.sat_alpha, es=args.sat_es,
+                                               num_epochs=args.epochs, lamb=args.fl_lambda, alpha=args.fl_alpha, gamma=args.fl_gamma)
     
     elif args.loss == 'sat_sce':
         alpha, beta = 1, 0.3

@@ -12,9 +12,9 @@ class CrossEntropy():
         
         self.soft_labels = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
         self.soft_labels[torch.arange(labels.shape[0]), labels] = 1
-        self.true_labels = pd.read_csv('/home/kaiyihuang/nexperia/new_data/true_labels.csv', index_col=0)
-        self.clean_labels = pd.read_csv('/home/kaiyihuang/nexperia/clean_labels.csv', index_col=0)
-        self.image_id_index = pd.read_csv('/home/kaiyihuang/nexperia/image_id_index.csv', index_col=0)
+        self.true_labels = pd.read_csv('files/true_labels.csv', index_col=0)
+        self.clean_labels = pd.read_csv('files/clean_labels.csv', index_col=0)
+        self.image_id_index = pd.read_csv('files/image_id_index.csv', index_col=0)
         self.weights = torch.zeros(num_epochs, len(self.true_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
         self.clean_weights = torch.zeros(num_epochs, len(self.clean_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
 
@@ -44,6 +44,232 @@ class CrossEntropy():
         return loss, loss_bi, margin_error, margin_error_bi
 
 
+class CrossEntropyTrain():
+    def __init__(self, labels, len_train, len_val, len_test, pass_idx, num_epochs, num_classes=10):
+        self.crit = nn.CrossEntropyLoss()
+        
+        self.soft_labels = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.soft_labels[torch.arange(labels.shape[0]), labels] = 1
+        
+        self.labels = labels
+        
+        self.len_train = len_train
+        self.len_val = len_val
+        self.len_test = len_test
+        
+        self.pass_idx = pass_idx
+        
+        self.num_classes = num_classes
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        loss =  self.crit(logits, targets)
+        
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+        loss_bi = F.binary_cross_entropy(1-prob[:,self.pass_idx], (targets!=self.pass_idx).float())
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,self.pass_idx] * 2 - 1) * torch.sign((targets==4).int() - 0.5))
+
+        if state=='val':
+            index+=self.len_train
+        elif state=='test':
+            index+=self.len_train + self.len_val
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+        
+        self.soft_labels[index] = prob
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
+class CrossEntropyGeneral():
+    def __init__(self, len_train, len_val, len_test, num_epochs, num_classes=10):
+        self.crit = nn.CrossEntropyLoss()
+        
+        self.soft_labels = torch.zeros(len_train + len_val + len_test, num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.image_class_index = torch.zeros(len_train + len_val + len_test, dtype=torch.long).cuda(non_blocking=True)
+        
+        self.len_train = len_train
+        self.len_val = len_val
+        self.len_test = len_test
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        loss =  self.crit(logits, targets)
+        
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+        loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,4] * 2 - 1) * torch.sign((targets==4).int() - 0.5))
+
+        if state=='val':
+            index+=self.len_train
+        elif state=='test':
+            length = self.len_train + self.len_val
+            index+=length
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+            
+        if epoch==0:
+            self.image_class_index[index]=targets
+        
+        self.soft_labels[index] = prob
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
+class FocalLoss():
+    def __init__(self, labels, num_epochs, num_classes=10, alpha=1, gamma=2):        
+        
+        self.soft_labels = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.soft_labels[torch.arange(labels.shape[0]), labels] = 1
+        self.true_labels = pd.read_csv('files/true_labels.csv', index_col=0)
+        self.clean_labels = pd.read_csv('files/clean_labels.csv', index_col=0)
+        self.image_id_index = pd.read_csv('files/image_id_index.csv', index_col=0)
+        self.weights = torch.zeros(num_epochs, len(self.true_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.clean_weights = torch.zeros(num_epochs, len(self.clean_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
+        
+        self.alpha = alpha
+        self.gamma = gamma
+        
+        self.num_classes = num_classes
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        # compute focal loss
+        targets_mat = torch.zeros(len(targets), self.num_classes).cuda(non_blocking=True)
+        targets_mat[np.arange(len(targets)), targets] = 1
+        loss = torch.sum(-self.alpha * (1 - F.softmax(logits, dim=1))**self.gamma * targets_mat * F.log_softmax(logits, dim=1), dim=1)
+        loss = loss.mean()
+        
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+        loss_bi = -self.alpha * ((1 - prob[:,4])**self.gamma * (targets==4) * torch.log(prob[:,4]) + prob[:,4]**self.gamma * (targets!=4) * torch.log(1 - prob[:,4])).mean()
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,4] * 2 - 1) * torch.sign((targets==4).int() - 0.5))
+
+        if state=='val':
+            index+=31025
+        elif state=='test':
+            index+=34472
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+        
+        self.soft_labels[index] = prob
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
+class FocalLossTrain():
+    def __init__(self, labels, len_train, len_val, len_test, pass_idx, num_epochs, num_classes=10, alpha=1, gamma=2):        
+        
+        self.soft_labels = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.soft_labels[torch.arange(labels.shape[0]), labels] = 1
+        
+        self.alpha = alpha
+        self.gamma = gamma
+        
+        self.labels = labels
+        
+        self.len_train = len_train
+        self.len_val = len_val
+        self.len_test = len_test
+        
+        self.pass_idx = pass_idx
+        
+        self.num_classes = num_classes
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        # compute focal loss
+        targets_mat = torch.zeros(len(targets), self.num_classes).cuda(non_blocking=True)
+        targets_mat[np.arange(len(targets)), targets] = 1
+        loss = torch.sum(-self.alpha * (1 - F.softmax(logits, dim=1))**self.gamma * targets_mat * F.log_softmax(logits, dim=1), dim=1)
+        loss = loss.mean()
+        
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+        loss_bi = -self.alpha * ((1 - prob[:,self.pass_idx])**self.gamma * (targets==self.pass_idx) * torch.log(prob[:,self.pass_idx]) + prob[:,self.pass_idx]**self.gamma * (targets!=self.pass_idx) * torch.log(1 - prob[:,self.pass_idx])).mean()
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,self.pass_idx] * 2 - 1) * torch.sign((targets==self.pass_idx).int() - 0.5))
+
+        if state=='val':
+            index+=self.len_train
+        elif state=='test':
+            length = self.len_train + self.len_val
+            index+=length
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+        
+        self.soft_labels[index] = prob
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
+class FocalLossGeneral():
+    def __init__(self, len_train, len_val, len_test, num_epochs, num_classes=10, alpha=1, gamma=2):        
+        self.soft_labels = torch.zeros(len_train + len_val + len_test, num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.image_class_index = torch.zeros(len_train + len_val + len_test, dtype=torch.long).cuda(non_blocking=True)
+        
+        self.len_train = len_train
+        self.len_val = len_val
+        self.len_test = len_test
+        
+        self.alpha = alpha
+        self.gamma = gamma
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        # compute focal loss
+        targets_mat = torch.zeros(len(targets), self.num_classes).cuda(non_blocking=True)
+        targets_mat[np.arange(len(targets)), targets] = 1
+        loss = torch.sum(-self.alpha * (1 - F.softmax(logits, dim=1))**self.gamma * targets_mat * F.log_softmax(logits, dim=1), dim=1)
+        loss = loss.mean()
+        
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+        loss_bi = -self.alpha * ((1 - prob[:,4])**self.gamma * (targets==4) * torch.log(prob[:,4]) + prob[:,4]**self.gamma * (targets!=4) * torch.log(1 - prob[:,4])).mean()
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,4] * 2 - 1) * torch.sign((targets==4).int() - 0.5))
+
+        if state=='val':
+            index+=self.len_train
+        elif state=='test':
+            length = self.len_train + self.len_val
+            index+=length
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+            
+        if epoch==0:
+            self.image_class_index[index]=targets
+        
+        self.soft_labels[index] = prob
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
 class CrossEntropyWeightedBinary():
     def __init__(self, labels, num_epochs, num_classes=10,
                  el1=None, el2=None, el3=None, el4=None, el5=None,
@@ -52,9 +278,9 @@ class CrossEntropyWeightedBinary():
         
         self.soft_labels = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
         self.soft_labels[torch.arange(labels.shape[0]), labels] = 1
-        self.true_labels = pd.read_csv('/home/kaiyihuang/nexperia/new_data/true_labels.csv', index_col=0)
-        self.clean_labels = pd.read_csv('/home/kaiyihuang/nexperia/clean_labels.csv', index_col=0)
-        self.image_id_index = pd.read_csv('/home/kaiyihuang/nexperia/image_id_index.csv', index_col=0)
+        self.true_labels = pd.read_csv('files/true_labels.csv', index_col=0)
+        self.clean_labels = pd.read_csv('files/nexperia/clean_labels.csv', index_col=0)
+        self.image_id_index = pd.read_csv('files/image_id_index.csv', index_col=0)
         self.weights = torch.zeros(num_epochs, len(self.true_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
         self.clean_weights = torch.zeros(num_epochs, len(self.clean_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
         
@@ -93,6 +319,44 @@ class CrossEntropyWeightedBinary():
         return torch.mean(loss), torch.mean(loss_bi), margin_error, margin_error_bi
 
 
+class WeightedCrossEntropy():
+    def __init__(self, labels, num_epochs, num_classes=10):
+        self.crit = nn.CrossEntropyLoss(weight = torch.tensor([4, 4, 4, 4, 1, 4, 4, 4, 4, 4], dtype=torch.float).cuda(non_blocking=True))
+        
+        self.soft_labels = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.soft_labels[torch.arange(labels.shape[0]), labels] = 1
+        self.true_labels = pd.read_csv('files/true_labels.csv', index_col=0)
+        self.clean_labels = pd.read_csv('files/clean_labels.csv', index_col=0)
+        self.image_id_index = pd.read_csv('files/image_id_index.csv', index_col=0)
+        self.weights = torch.zeros(num_epochs, len(self.true_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.clean_weights = torch.zeros(num_epochs, len(self.clean_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        loss =  self.crit(logits, targets)
+        
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+        loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,4] * 2 - 1) * torch.sign((targets==4).int() - 0.5))
+
+        if state=='val':
+            index+=31025
+        elif state=='test':
+            index+=34472
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+        
+        self.soft_labels[index] = prob
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+    
+
 class SelfAdaptiveTrainingCE():
     def __init__(self, labels, num_epochs, num_classes=10, momentum=0.9, es=40):
         # initialize soft labels to onthot vectors
@@ -103,9 +367,9 @@ class SelfAdaptiveTrainingCE():
         self.momentum = momentum
         self.es = es
         
-        self.true_labels = pd.read_csv('/home/kaiyihuang/nexperia/new_data/true_labels.csv', index_col=0)
-        self.clean_labels = pd.read_csv('/home/kaiyihuang/nexperia/clean_labels.csv', index_col=0)
-        self.image_id_index = pd.read_csv('/home/kaiyihuang/nexperia/image_id_index.csv', index_col=0)
+        self.true_labels = pd.read_csv('files/true_labels.csv', index_col=0)
+        self.clean_labels = pd.read_csv('files/clean_labels.csv', index_col=0)
+        self.image_id_index = pd.read_csv('files/image_id_index.csv', index_col=0)
         self.weights = torch.zeros(num_epochs, len(self.true_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
         self.clean_weights = torch.zeros(num_epochs, len(self.clean_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
 
@@ -161,6 +425,394 @@ class SelfAdaptiveTrainingCE():
         return loss, loss_bi, margin_error, margin_error_bi
 
 
+class SelfAdaptiveTrainingCETrain():
+    def __init__(self, labels, len_train, len_val, len_test, pass_idx, num_epochs, num_classes=10, momentum=0.9, es=40):
+        # initialize soft labels to onthot vectors
+        self.soft_labels = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.soft_labels[torch.arange(labels.shape[0]), labels] = 1
+        self.outputs = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.outputs[torch.arange(labels.shape[0]), labels] = 1
+        self.momentum = momentum
+        self.es = es
+        
+        self.labels = labels
+        
+        self.len_train = len_train
+        self.len_val = len_val
+        self.len_test = len_test
+        
+        self.pass_idx = pass_idx
+        
+        self.num_classes = num_classes
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,self.pass_idx] * 2 - 1) * torch.sign((targets==self.pass_idx).int() - 0.5))
+
+        if state=='val':
+            index+=self.len_train
+        elif state=='test':
+            index+=self.len_train + self.len_val
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+
+        self.outputs[index] = prob
+        if epoch < self.es:
+            loss = F.cross_entropy(logits, targets)
+            loss_bi = F.binary_cross_entropy(1-prob[:,self.pass_idx], (targets!=self.pass_idx).float())
+            return loss, loss_bi, margin_error, margin_error_bi
+        else:
+            if mod is not None:
+                self.soft_labels[index[targets==self.pass_idx]] = self.momentum*self.soft_labels[index[targets==self.pass_idx]]+(1-self.momentum)*prob[targets==self.pass_idx]
+            else:
+                self.soft_labels[index] = self.momentum * self.soft_labels[index] + (1 - self.momentum) * prob
+
+        if state=='train':
+            # obtain weights
+            weights, _ = self.soft_labels[index].max(dim=1)
+            if mod=='bad_boost':
+                weights[torch.logical_or(targets==0, torch.logical_or(targets==3, targets==7))] = 5.
+            weights *= logits.shape[0] / weights.sum()
+
+            # compute cross entropy loss, without reduction
+            loss = torch.sum(-F.log_softmax(logits, dim=1) * self.soft_labels[index], dim=1)
+
+            # sample weighted mean
+            loss = (loss * weights).mean()
+            loss_bi = F.binary_cross_entropy(1-prob[:,self.pass_idx], (targets!=self.pass_idx).float(), weight=weights)
+        else:
+            loss = F.cross_entropy(logits, targets)
+            loss_bi = F.binary_cross_entropy(1-prob[:,self.pass_idx], (targets!=self.pass_idx).float())
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
+class SelfAdaptiveTrainingCEGeneral():
+    def __init__(self, len_train, len_val, len_test, num_epochs, num_classes=10, momentum=0.9, es=40):
+        # initialize soft labels to onthot vectors
+        self.soft_labels = torch.zeros(len_train + len_val + len_test, num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.image_class_index = torch.zeros(len_train + len_val + len_test, dtype=torch.long).cuda(non_blocking=True)
+        self.outputs = torch.zeros(len_train + len_val + len_test, num_classes, dtype=torch.float).cuda(non_blocking=True)
+        
+        self.len_train = len_train
+        self.len_val = len_val
+        self.len_test = len_test
+
+        self.momentum = momentum
+        self.es = es
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,4] * 2 - 1) * torch.sign((targets==4).int() - 0.5))
+
+        if state=='val':
+            index+=self.len_train
+        elif state=='test':
+            length = self.len_train + self.len_val
+            index+=length
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+
+        self.outputs[index] = prob
+        if epoch < self.es:
+            if epoch==0:
+                self.soft_labels[index, targets] = 1
+                self.image_class_index[index]=targets
+            loss = F.cross_entropy(logits, targets)
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+            return loss, loss_bi, margin_error, margin_error_bi
+        else:
+            if mod is not None:
+                self.soft_labels[index[targets==4]] = self.momentum*self.soft_labels[index[targets==4]]+(1-self.momentum)*prob[targets==4]
+            else:
+                self.soft_labels[index] = self.momentum * self.soft_labels[index] + (1 - self.momentum) * prob
+
+        if state=='train':
+            # obtain weights
+            weights, _ = self.soft_labels[index].max(dim=1)
+            if mod=='bad_boost':
+                weights[
+                    torch.logical_or(torch.logical_or(targets==5, targets==7),
+                                     torch.logical_or(targets==8, targets==9))] = 5.
+            weights *= logits.shape[0] / weights.sum()
+
+            # compute cross entropy loss, without reduction
+            loss = torch.sum(-F.log_softmax(logits, dim=1) * self.soft_labels[index], dim=1)
+
+            # sample weighted mean
+            loss = (loss * weights).mean()
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float(), weight=weights)
+        else:
+            loss = F.cross_entropy(logits, targets)
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
+class SelfAdaptiveTrainingFL():
+    def __init__(self, labels, num_epochs, num_classes=10, momentum=0.9, es=40, lamb=0.5, alpha=1, gamma=2):
+        # initialize soft labels to onthot vectors
+        self.soft_labels = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.soft_labels[torch.arange(labels.shape[0]), labels] = 1
+        self.outputs = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.outputs[torch.arange(labels.shape[0]), labels] = 1
+        self.momentum = momentum
+        self.es = es
+        
+        self.true_labels = pd.read_csv('files/true_labels.csv', index_col=0)
+        self.clean_labels = pd.read_csv('files/clean_labels.csv', index_col=0)
+        self.image_id_index = pd.read_csv('files/image_id_index.csv', index_col=0)
+        self.weights = torch.zeros(num_epochs, len(self.true_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.clean_weights = torch.zeros(num_epochs, len(self.clean_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
+
+        self.lamb = lamb
+        self.alpha = alpha
+        self.gamma = gamma
+        
+        self.num_classes = num_classes
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,4] * 2 - 1) * torch.sign((targets==4).int() - 0.5))
+
+        if state=='val':
+            index+=31025
+        elif state=='test':
+            index+=34472
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+
+        self.outputs[index] = prob
+        if epoch < self.es:
+            loss = F.cross_entropy(logits, targets)
+
+            # obtain prob, then update running avg
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+            return loss, loss_bi, margin_error, margin_error_bi
+        else:
+            if mod is not None:
+                self.soft_labels[index[targets==4]] = self.momentum*self.soft_labels[index[targets==4]]+(1-self.momentum)*prob[targets==4]
+            else:
+                self.soft_labels[index] = self.momentum * self.soft_labels[index] + (1 - self.momentum) * prob
+
+        if state=='train':
+            # obtain weights
+            weights, _ = self.soft_labels[index].max(dim=1)
+            if mod=='bad_boost':
+                weights[
+                    torch.logical_or(torch.logical_or(targets==5, targets==7),
+                                     torch.logical_or(targets==8, targets==9))] = 5.
+            weights *= logits.shape[0] / weights.sum()
+
+            # compute cross entropy loss, without reduction
+            loss_1 = torch.sum(-F.log_softmax(logits, dim=1) * self.soft_labels[index], dim=1)
+
+            # sample weighted mean
+            loss_1 = (loss_1 * weights).mean()
+            # compute focal loss
+            loss_2 = torch.sum(
+                -(1 - F.softmax(logits, dim=1))**self.gamma * self.soft_labels[index] * F.log_softmax(logits, dim=1), dim=1)
+            loss_2 = loss_2.mean()
+            
+            loss = self.lamb * loss_1 + (1 - self.lamb) * loss_2
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float(), weight=weights)
+        else:
+            loss = F.cross_entropy(logits, targets)
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
+class SelfAdaptiveTrainingFLTrain():
+    def __init__(self, labels, len_train, len_val, len_test, pass_idx,
+                 num_epochs, num_classes=10, momentum=0.9, es=40, lamb=0.5, alpha=1, gamma=2):
+        # initialize soft labels to onthot vectors
+        self.soft_labels = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.soft_labels[torch.arange(labels.shape[0]), labels] = 1
+        self.outputs = torch.zeros(labels.shape[0], num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.outputs[torch.arange(labels.shape[0]), labels] = 1
+        self.momentum = momentum
+        self.es = es
+        
+        self.lamb = lamb
+        self.alpha = alpha
+        self.gamma = gamma
+        
+        self.labels = labels
+        
+        self.len_train = len_train
+        self.len_val = len_val
+        self.len_test = len_test
+        
+        self.pass_idx = pass_idx
+        
+        self.num_classes = num_classes
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,self.pass_idx] * 2 - 1) * torch.sign((targets==self.pass_idx).int() - 0.5))
+
+        if state=='val':
+            index+=self.len_train
+        elif state=='test':
+            index+=self.len_train + self.len_val
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+
+        self.outputs[index] = prob
+        if epoch < self.es:
+            loss = F.cross_entropy(logits, targets)
+
+            # obtain prob, then update running avg
+            loss_bi = F.binary_cross_entropy(1-prob[:,self.pass_idx], (targets!=self.pass_idx).float())
+            return loss, loss_bi, margin_error, margin_error_bi
+        else:
+            if mod is not None:
+                self.soft_labels[index[targets==self.pass_idx]] = self.momentum*self.soft_labels[index[targets==self.pass_idx]]+(1-self.momentum)*prob[targets==self.pass_idx]
+            else:
+                self.soft_labels[index] = self.momentum * self.soft_labels[index] + (1 - self.momentum) * prob
+
+        if state=='train':
+            # obtain weights
+            weights, _ = self.soft_labels[index].max(dim=1)
+            if mod=='bad_boost':
+                weights[
+                    torch.logical_or(torch.logical_or(targets==5, targets==7),
+                                     torch.logical_or(targets==8, targets==9))] = 5.
+            weights *= logits.shape[0] / weights.sum()
+
+            # compute cross entropy loss, without reduction
+            loss_1 = torch.sum(-F.log_softmax(logits, dim=1) * self.soft_labels[index], dim=1)
+
+            # sample weighted mean
+            loss_1 = (loss_1 * weights).mean()
+            # compute focal loss
+            loss_2 = torch.sum(
+                -(1 - F.softmax(logits, dim=1))**self.gamma * self.soft_labels[index] * F.log_softmax(logits, dim=1), dim=1)
+            loss_2 = loss_2.mean()
+            
+            loss = self.lamb * loss_1 + (1 - self.lamb) * loss_2
+            loss_bi = F.binary_cross_entropy(1-prob[:,self.pass_idx], (targets!=self.pass_idx).float(), weight=weights)
+        else:
+            loss = F.cross_entropy(logits, targets)
+            loss_bi = F.binary_cross_entropy(1-prob[:,self.pass_idx], (targets!=self.pass_idx).float())
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
+class SelfAdaptiveTrainingFLGeneral():
+    def __init__(self, len_train, len_val, len_test, num_epochs, num_classes=10, momentum=0.9, es=40, lamb=0.5, alpha=1, gamma=2):
+        # initialize soft labels to onthot vectors
+        self.soft_labels = torch.zeros(len_train + len_val + len_test, num_classes, dtype=torch.float).cuda(non_blocking=True)
+        self.image_class_index = torch.zeros(len_train + len_val + len_test, dtype=torch.long).cuda(non_blocking=True)
+        self.outputs = torch.zeros(len_train + len_val + len_test, num_classes, dtype=torch.float).cuda(non_blocking=True)
+        
+        self.len_train = len_train
+        self.len_val = len_val
+        self.len_test = len_test
+
+        self.momentum = momentum
+        self.es = es
+        
+        self.lamb = lamb
+        self.alpha = alpha
+        self.gamma = gamma
+        
+        self.num_classes = num_classes
+
+    def __call__(self, logits, targets, index, epoch, state='train', mod=None):
+        # obtain prob, then update running avg
+        prob = F.softmax(logits.detach(), dim=1)
+
+        margin_error = torch.mean(prob[np.arange(len(targets)),targets]
+                                  - torch.max(
+                                      prob[
+                                          torch.arange(prob.size(1)).reshape(1,-1).repeat(len(targets),1)
+                                          !=targets.reshape(-1,1).repeat(1,prob.size(1)).cpu()]
+                                      .view(len(targets), -1), 1)[0])
+        margin_error_bi = torch.mean((prob[:,4] * 2 - 1) * torch.sign((targets==4).int() - 0.5))
+
+        if state=='val':
+            index+=self.len_train
+        elif state=='test':
+            length = self.len_train + self.len_val
+            index+=length
+        elif state!='train':
+            raise KeyError("State {} is not supported.".format(state))
+
+        self.outputs[index] = prob
+        if epoch < self.es:
+            loss = F.cross_entropy(logits, targets)
+
+            # obtain prob, then update running avg
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+            return loss, loss_bi, margin_error, margin_error_bi
+        else:
+            if mod is not None:
+                self.soft_labels[index[targets==4]] = self.momentum*self.soft_labels[index[targets==4]]+(1-self.momentum)*prob[targets==4]
+            else:
+                self.soft_labels[index] = self.momentum * self.soft_labels[index] + (1 - self.momentum) * prob
+
+        if state=='train':
+            # obtain weights
+            weights, _ = self.soft_labels[index].max(dim=1)
+            if mod=='bad_boost':
+                weights[
+                    torch.logical_or(torch.logical_or(targets==5, targets==7),
+                                     torch.logical_or(targets==8, targets==9))] = 5.
+            weights *= logits.shape[0] / weights.sum()
+
+            # compute cross entropy loss, without reduction
+            loss_1 = torch.sum(-F.log_softmax(logits, dim=1) * self.soft_labels[index], dim=1)
+
+            # sample weighted mean
+            loss_1 = (loss_1 * weights).mean()
+            # compute focal loss
+            loss_2 = torch.sum(
+                -(1 - F.softmax(logits, dim=1))**self.gamma * self.soft_labels[index] * F.log_softmax(logits, dim=1), dim=1)
+            loss_2 = loss_2.mean()
+            
+            loss = self.lamb * loss_1 + (1 - self.lamb) * loss_2
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float(), weight=weights)
+        else:
+            loss = F.cross_entropy(logits, targets)
+            loss_bi = F.binary_cross_entropy(1-prob[:,4], (targets!=4).float())
+        
+        return loss, loss_bi, margin_error, margin_error_bi
+
+
 class SelfAdaptiveTrainingCEMultiWeightedBCE():
     def __init__(self, labels, num_epochs, num_classes=10,
                  es1=None, es2=None, es3=None, es4=None, es5=None,
@@ -177,9 +829,9 @@ class SelfAdaptiveTrainingCEMultiWeightedBCE():
         self.ce_momentum = ce_momentum
         self.momentum = momentum
         
-        self.true_labels = pd.read_csv('/home/kaiyihuang/nexperia/new_data/true_labels.csv', index_col=0)
-        self.clean_labels = pd.read_csv('/home/kaiyihuang/nexperia/clean_labels.csv', index_col=0)
-        self.image_id_index = pd.read_csv('/home/kaiyihuang/nexperia/image_id_index.csv', index_col=0)
+        self.true_labels = pd.read_csv('files/true_labels.csv', index_col=0)
+        self.clean_labels = pd.read_csv('files/clean_labels.csv', index_col=0)
+        self.image_id_index = pd.read_csv('files/image_id_index.csv', index_col=0)
         self.weights = torch.zeros(num_epochs, len(self.true_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
         self.clean_weights = torch.zeros(num_epochs, len(self.clean_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
 
@@ -246,9 +898,9 @@ class SelfAdaptiveTrainingWeightedBCE():
         self.el = torch.tensor([el1, el2, el3, el4, el5, el6, el7, el8, el9, el10]).cuda(non_blocking=True)
         self.ce_momentum = ce_momentum
         
-        self.true_labels = pd.read_csv('/home/kaiyihuang/nexperia/new_data/true_labels.csv', index_col=0)
-        self.clean_labels = pd.read_csv('/home/kaiyihuang/nexperia/clean_labels.csv', index_col=0)
-        self.image_id_index = pd.read_csv('/home/kaiyihuang/nexperia/image_id_index.csv', index_col=0)
+        self.true_labels = pd.read_csv('files/true_labels.csv', index_col=0)
+        self.clean_labels = pd.read_csv('files/clean_labels.csv', index_col=0)
+        self.image_id_index = pd.read_csv('files/image_id_index.csv', index_col=0)
         self.weights = torch.zeros(num_epochs, len(self.true_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
         self.clean_weights = torch.zeros(num_epochs, len(self.clean_labels), num_classes, dtype=torch.float).cuda(non_blocking=True)
 
